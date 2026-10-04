@@ -1,0 +1,933 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Milky Way — Unified Factual 3D Corkscrew • Local Dynamics • Fixed Dynamic Control Grid</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;color:#eef5ff;font-family:Inter,Segoe UI,system-ui,sans-serif}
+#app{position:fixed;inset:0;background:radial-gradient(circle at 50% 50%,#07111e 0,#02060d 42%,#000 100%)}
+canvas#gl{position:absolute;inset:0;width:100%;height:100%;display:block}
+#vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,.38) 100%)}
+.panel{position:absolute;left:14px;top:14px;width:min(500px,calc(100vw - 28px));max-height:calc(100vh - 28px);overflow:auto;z-index:20;background:linear-gradient(180deg,rgba(11,7,24,.96),rgba(5,8,17,.93));border:1px solid rgba(184,132,255,.34);border-radius:17px;padding:13px;backdrop-filter:blur(14px);box-shadow:0 18px 70px rgba(0,0,0,.68),0 0 32px rgba(133,73,255,.09);scrollbar-width:thin;scrollbar-color:rgba(185,132,255,.55) rgba(255,255,255,.04)}
+.panel::-webkit-scrollbar{width:8px}.panel::-webkit-scrollbar-track{background:rgba(255,255,255,.03);border-radius:10px}.panel::-webkit-scrollbar-thumb{background:rgba(185,132,255,.42);border-radius:10px;border:2px solid transparent;background-clip:padding-box}
+.panel.collapsed{width:58px;height:58px;overflow:hidden;padding:7px;border-radius:16px}.panel.collapsed .body,.panel.collapsed .head b,.panel.collapsed .tag{display:none}.panel.collapsed .head{display:flex;position:relative;inset:auto;height:44px;padding:0;background:transparent;justify-content:center;align-items:center}.panel.collapsed #collapse{width:44px;height:44px;min-height:44px;padding:0;border-radius:12px;font-size:17px;line-height:1;color:#f4eaff;display:flex;align-items:center;justify-content:center;margin:0}.panel.collapsed #collapse::after{content:'Open';position:absolute;left:62px;top:50%;transform:translateY(-50%);font:700 8px ui-monospace,monospace;color:#c89dff;opacity:.0;pointer-events:none}.panel.collapsed:hover #collapse::after{opacity:1}
+.head{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:8px;position:sticky;top:-13px;padding:5px 0 8px;background:linear-gradient(180deg,rgba(11,7,24,.99),rgba(11,7,24,.90),rgba(11,7,24,0));z-index:5}.head b{font-size:13px;letter-spacing:.25px;color:#f3eaff}.tag{font:700 8px ui-monospace,monospace;color:#c9a5ff}
+button,select,input{font:inherit}button{border:1px solid rgba(206,170,255,.18);background:linear-gradient(180deg,#151027,#0b1422);color:#efe7ff;border-radius:9px;padding:7px 8px;cursor:pointer;min-height:34px;transition:.16s ease}button:hover{background:linear-gradient(180deg,#20153c,#101d30);border-color:rgba(206,170,255,.42);transform:translateY(-1px)}button.active{background:linear-gradient(180deg,#6f3cb8,#4c2385);border-color:#d1b3ff88;box-shadow:0 0 16px rgba(153,92,255,.18)}
+.grid3{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.controlGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:minmax(78px,auto);gap:9px;align-items:stretch}.controlGrid .row{margin:0;padding:9px 10px;border:1px solid rgba(206,170,255,.10);border-radius:11px;background:linear-gradient(180deg,rgba(17,12,32,.56),rgba(10,10,20,.38));min-width:0;min-height:78px;display:flex;flex-direction:column;justify-content:space-between;gap:7px;box-shadow:inset 0 1px 0 rgba(255,255,255,.018)}.controlGrid .row label{display:grid;grid-template-columns:minmax(0,1fr) max-content;min-height:34px;align-items:start;margin:0;line-height:1.25}.controlGrid .row input[type=range]{margin-top:1px}.controlGrid .row select{width:100%;min-height:34px}.controlGrid .full{grid-column:1/-1}
+.body{display:grid;gap:10px}.sec{margin:0;padding-top:0;border-top:0}.sec.motionSec,.sec.galaxySec,.sec.visibilitySec,.sec.cameraSec{background:linear-gradient(180deg,rgba(18,11,34,.42),rgba(8,9,18,.18));border:1px solid rgba(189,140,255,.10);border-radius:12px;padding:11px}.sec.motionSec .controlTitle,.sec.galaxySec .controlTitle,.sec.visibilitySec .controlTitle,.sec.cameraSec .controlTitle{color:#c89dff}.sec.viewsSec{background:linear-gradient(180deg,rgba(111,60,184,.10),rgba(8,9,18,.10));border-radius:12px;padding:10px;border:1px solid rgba(206,170,255,.13)}
+.row{margin:7px 0}.row label{display:flex;justify-content:space-between;gap:8px;font-size:10px;color:#d9d0eb;margin-bottom:4px}.val{font:700 10px ui-monospace,monospace;color:#d2aaff;white-space:nowrap}.controlGrid .row label{padding-bottom:1px}
+input[type=range]{width:100%;accent-color:#b77aff;filter:saturate(1.15);cursor:pointer}input[type=range]::-webkit-slider-runnable-track{height:5px;border-radius:99px;background:rgba(191,151,255,.18)}input[type=range]::-webkit-slider-thumb{margin-top:-5px;width:15px;height:15px;border-radius:50%;background:#c18aff;border:1px solid #f0dcff;box-shadow:0 0 12px rgba(186,120,255,.36)}input[type=range]::-moz-range-track{height:5px;border-radius:99px;background:rgba(191,151,255,.18)}input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:#c18aff;border:1px solid #f0dcff;box-shadow:0 0 12px rgba(186,120,255,.36)}
+select{background:linear-gradient(180deg,#151027,#0b1422)!important;color:#efe7ff;border:1px solid rgba(206,170,255,.18)!important;border-radius:9px;padding:7px 8px;outline:none}select:focus{border-color:rgba(206,170,255,.55)!important;box-shadow:0 0 0 2px rgba(153,92,255,.12)}
+.chk{display:flex;gap:7px;align-items:center;font-size:9.2px;color:#d5cce6;margin:0;min-height:34px;padding:6px 8px;border:1px solid rgba(206,170,255,.08);border-radius:9px;background:rgba(12,9,22,.35);transition:.16s ease}.chk:hover{border-color:rgba(206,170,255,.2);background:rgba(24,16,40,.48)}.chk input{accent-color:#b77aff}
+.visibilitySec .controlGrid{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:minmax(44px,auto)}.visibilitySec .controlGrid .row{grid-column:auto}.visibilitySec .controlGrid .chk{min-height:48px}
+.viewsSec .grid3{grid-template-columns:repeat(4,minmax(0,1fr))}.viewsSec button{font-size:9px;line-height:1.15;min-height:44px}.viewsSec button[data-view="corkscrew"],.viewsSec button[data-view="system"],.viewsSec button[data-view="spin"],.viewsSec button[data-view="vel"]{border-color:rgba(202,157,255,.55);background:linear-gradient(180deg,rgba(111,60,184,.46),rgba(37,20,66,.64));box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}.viewsSec button[data-view="corkscrew"]{box-shadow:0 0 18px rgba(157,92,255,.16),inset 0 1px 0 rgba(255,255,255,.06)}
+.actionbar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:minmax(38px,auto);gap:7px}.actionbar button{min-width:0;min-height:38px}
+.tiny{font-size:8.5px;line-height:1.5;color:#a99fba}.tiny b{color:#dfc5ff}
+#stats{position:absolute;right:14px;top:14px;z-index:15;min-width:280px;padding:9px 11px;border-radius:12px;border:1px solid rgba(255,255,255,.11);background:rgba(3,7,14,.72);font:9.5px/1.52 ui-monospace,monospace;color:#cdd8e8;box-shadow:0 12px 30px rgba(0,0,0,.42)}
+.gold{color:#ffd65a}.cyan{color:#72caff}.mint{color:#72e2bf}.pink{color:#ff9ec8}.purple{color:#c79cff}.orange{color:#ffb76b}
+#inset{position:absolute;right:14px;bottom:14px;width:min(470px,calc(100vw - 28px));height:335px;z-index:18;border:1px solid rgba(255,255,255,.15);border-radius:13px;background:rgba(2,6,13,.94);overflow:hidden;box-shadow:0 16px 44px rgba(0,0,0,.55)}
+#insetCanvas{position:absolute;inset:0;width:100%;height:100%}
+.ititle{position:absolute;left:10px;top:8px;font-size:10px;font-weight:800;z-index:4;color:#efe7ff}
+.isub{position:absolute;left:10px;top:24px;font-size:8px;color:#9aa9bc;z-index:4;max-width:calc(100% - 20px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tabs{position:absolute;left:8px;right:8px;top:40px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;z-index:3}.tabs button{font-size:8px;padding:6px 5px;min-width:0;min-height:34px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-color:rgba(206,170,255,.16)}
+#help{position:absolute;left:14px;bottom:14px;z-index:15;color:#9eafc4;background:rgba(3,7,13,.60);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:7px 9px;font-size:8.4px;line-height:1.35}
+#caption{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);max-width:min(780px,calc(100vw - 30px));z-index:15;text-align:center;font-size:8.6px;color:#a4b5c8;background:rgba(0,0,0,.38);padding:5px 8px;border-radius:8px}
+.controlTitle{font-size:9px;font-weight:850;letter-spacing:.5px;color:#c89dff;text-transform:uppercase;margin-bottom:8px}
+.divider{height:1px;background:rgba(255,255,255,.06);margin:7px 0}
+.actionbar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+button.warn{border-color:rgba(255,190,90,.34)}
+.badgeOn{color:#77e3b8}.badgeOff{color:#ffadad}
+#toast{position:absolute;left:50%;top:18px;transform:translateX(-50%);z-index:40;opacity:0;pointer-events:none;background:rgba(8,16,27,.94);border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:7px 10px;font:9px ui-monospace,monospace;color:#dce9f8;transition:opacity .18s ease}
+#modeStrip{position:absolute;left:50%;top:48px;transform:translateX(-50%);z-index:14;display:flex;align-items:center;gap:7px;padding:6px 10px;border:1px solid rgba(198,156,255,.2);border-radius:999px;background:rgba(9,6,18,.68);backdrop-filter:blur(9px);font:700 8px ui-monospace,monospace;color:#d7c1f3;letter-spacing:.25px;white-space:nowrap;box-shadow:0 10px 30px rgba(0,0,0,.28)}#modeStripView{color:#d6adff}#modeStripVertical{color:#8fe5c7}#modeStripPlanets{color:#ffd67b}#modeStripCarrier{color:#b9d8ff}
+#loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:50;background:#000;color:#b9d9ff;font:12px ui-monospace,monospace;letter-spacing:.5px}
+@media(max-width:1100px){.panel{width:min(500px,calc(100vw - 24px))}.controlGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.viewsSec .grid3{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:820px){.panel{width:min(460px,calc(100vw - 20px));left:10px;top:10px;max-height:calc(100vh - 20px)}#stats{display:none}#inset{width:min(430px,calc(100vw - 20px));height:315px;right:10px;bottom:10px}.viewsSec .grid3{grid-template-columns:repeat(3,minmax(0,1fr))}.tabs{grid-template-columns:repeat(5,minmax(0,1fr))}}
+@media(max-width:620px){.panel{width:calc(100vw - 16px);left:8px;top:8px;max-height:calc(100vh - 16px)}.grid3,.viewsSec .grid3{grid-template-columns:repeat(2,minmax(0,1fr))}.grid2,.controlGrid,.visibilitySec .controlGrid{grid-template-columns:1fr}.controlGrid{grid-auto-rows:auto}.controlGrid .row{min-height:74px}.controlGrid .full{grid-column:auto}.actionbar{grid-template-columns:repeat(2,minmax(0,1fr))}.extra{display:none}#inset{width:calc(100vw - 16px);height:285px;right:8px;bottom:8px}.tabs{grid-template-columns:repeat(2,minmax(0,1fr));top:43px}.ititle{font-size:9px}.isub{font-size:7.5px}.tabs button{font-size:7.5px}#help{display:none}}
+@media(min-width:1500px){.panel{width:520px}.controlGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.viewsSec .grid3{grid-template-columns:repeat(4,minmax(0,1fr))}.viewsSec button{min-height:44px}}
+
+
+/* ---------- FINAL CONTENT ORDER ---------- */
+.pageMain{display:flex;flex-direction:column;align-items:stretch}
+.visualSection{order:1}
+.magnifiedSection{order:2}
+.controlsSection{order:3}
+.magnifiedSection{width:min(1280px,calc(100% - 28px));margin:18px auto 0}
+.magnifiedSection #inset{height:500px}
+@media(max-width:820px){.magnifiedSection #inset{height:420px}}
+@media(max-width:620px){.magnifiedSection #inset{height:390px}}
+
+/* ---------- FINAL VERTICAL LAYOUT ---------- */
+html,body{min-height:100%;height:auto;overflow-x:hidden;overflow-y:auto;background:#03020a}
+body{margin:0}
+#app{position:relative;inset:auto;min-height:100vh;background:radial-gradient(circle at 50% 8%,#120820 0,#050610 24%,#010207 68%,#000 100%)}
+.siteHeader{position:sticky;top:0;z-index:100;width:100%;background:linear-gradient(180deg,rgba(8,4,16,.98),rgba(8,4,16,.92));border-bottom:1px solid rgba(202,157,255,.20);box-shadow:0 10px 40px rgba(0,0,0,.42);backdrop-filter:blur(16px)}
+.headerInner{width:min(1320px,calc(100% - 28px));margin:0 auto;padding:14px 0 12px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:center}
+.brandBlock{min-width:0}.eyebrow{font:800 8px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:1.2px;color:#b992ff;text-transform:uppercase;margin-bottom:5px}.brandBlock h1{margin:0;color:#f3eaff;font-size:clamp(18px,2.2vw,28px);line-height:1.1;font-weight:780;letter-spacing:-.3px}.headerSub{margin-top:6px;color:#a99db9;font-size:9.5px;line-height:1.4;max-width:900px}
+#modeStrip{position:static;left:auto;top:auto;transform:none;z-index:auto;display:grid;grid-template-columns:repeat(4,max-content);justify-content:end;align-items:center;gap:7px;padding:9px 11px;border:1px solid rgba(198,156,255,.24);border-radius:14px;background:linear-gradient(180deg,rgba(31,18,51,.78),rgba(10,6,20,.82));backdrop-filter:blur(10px);font:800 8px ui-monospace,monospace;color:#d7c1f3;letter-spacing:.25px;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.24)}
+#modeStripView{color:#d6adff}#modeStripVertical{color:#8fe5c7}#modeStripPlanets{color:#ffd67b}#modeStripCarrier{color:#b9d8ff}.modeDot{color:#7a5fa0}
+.pageMain{width:100%}.visualSection{position:relative;width:min(1440px,calc(100% - 28px));height:min(70vh,760px);min-height:500px;margin:16px auto 0;border:1px solid rgba(190,145,255,.16);border-radius:18px;overflow:hidden;background:#000;box-shadow:0 18px 70px rgba(0,0,0,.55)}
+.visualSection canvas#gl{position:absolute;inset:0;width:100%;height:100%}.visualSection #vignette{position:absolute;inset:0;pointer-events:none}.visualSection #loading{position:absolute;inset:0}.visualSection #stats{position:absolute;right:14px;top:14px}.visualSection #help{position:absolute;left:14px;bottom:14px}.visualSection #caption{position:absolute;left:50%;bottom:8px;transform:translateX(-50%)}
+.controlsSection{width:min(1280px,calc(100% - 28px));margin:18px auto 0}.controlsSection .panel{position:relative;left:auto;top:auto;width:100%;max-height:none;overflow:visible;padding:14px;background:linear-gradient(180deg,rgba(11,7,24,.98),rgba(5,8,17,.95));border:1px solid rgba(184,132,255,.34);border-radius:18px;box-shadow:0 18px 70px rgba(0,0,0,.58),0 0 32px rgba(133,73,255,.08)}
+.controlsSection .head{position:relative;top:auto;padding:0 0 10px;background:none;border-bottom:1px solid rgba(206,170,255,.10);grid-template-columns:minmax(0,1fr) auto auto}.controlsSection .head b{font-size:14px}.controlsSection .body{display:grid;gap:10px;padding-top:10px}.controlsSection .sec{min-width:0}
+.controlsSection .controlGrid{grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:minmax(86px,1fr)}.controlsSection .visibilitySec .controlGrid{grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:minmax(52px,auto)}.controlsSection .viewsSec .grid3{grid-template-columns:repeat(4,minmax(0,1fr))}.controlsSection .actionbar{grid-template-columns:repeat(3,minmax(0,1fr))}.controlsSection .grid2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.controlsSection .panel.collapsed{width:100%;height:auto;overflow:visible;padding:10px}.controlsSection .panel.collapsed .body{display:none}.controlsSection .panel.collapsed .head{border-bottom:0;padding:0}.controlsSection .panel.collapsed #collapse{width:42px;height:38px;min-height:38px;font-size:16px}
+.magnifiedSection{width:min(1280px,calc(100% - 28px));margin:18px auto 48px}.sectionHeading{display:flex;justify-content:space-between;align-items:baseline;gap:18px;padding:0 4px 9px;color:#eadcff}.sectionHeading div{font:900 11px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.7px}.sectionHeading span{font-size:9px;color:#9f92ac;text-align:right}
+.magnifiedSection #inset{position:relative;right:auto;bottom:auto;width:100%;height:520px;z-index:auto;border:1px solid rgba(206,170,255,.22);border-radius:16px;background:rgba(2,6,13,.96);overflow:hidden;box-shadow:0 18px 55px rgba(0,0,0,.48)}
+.magnifiedSection #insetCanvas{position:absolute;inset:0;width:100%;height:100%}.magnifiedSection .tabs{top:48px;left:10px;right:10px;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}.magnifiedSection .tabs button{min-height:38px;font-size:9px}.magnifiedSection .ititle{font-size:11px;top:10px;left:12px}.magnifiedSection .isub{top:27px;left:12px;font-size:8.5px}
+#toast{position:fixed;left:50%;top:86px;transform:translateX(-50%);z-index:120}
+@media(max-width:1180px){.headerInner{grid-template-columns:1fr}.headerInner #modeStrip{justify-content:start}.controlsSection .controlGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.controlsSection .visibilitySec .controlGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.visualSection{height:min(68vh,680px)}}
+@media(max-width:760px){.headerInner{width:calc(100% - 18px);padding:10px 0}.visualSection,.controlsSection,.magnifiedSection{width:calc(100% - 18px)}.visualSection{min-height:430px;height:58vh}.controlsSection .viewsSec .grid3{grid-template-columns:repeat(2,minmax(0,1fr))}.controlsSection .controlGrid,.controlsSection .visibilitySec .controlGrid,.controlsSection .grid2{grid-template-columns:1fr}.controlsSection .actionbar{grid-template-columns:1fr 1fr}.magnifiedSection #inset{height:440px}.magnifiedSection .tabs{grid-template-columns:repeat(2,minmax(0,1fr));top:48px}.sectionHeading{display:block}.sectionHeading span{display:block;text-align:left;margin-top:4px}#modeStrip{grid-template-columns:1fr 1fr;justify-content:stretch;width:100%}.modeDot{display:none}}
+@media(max-width:480px){.visualSection{min-height:380px}.controlsSection .actionbar{grid-template-columns:1fr}.magnifiedSection #inset{height:400px}.brandBlock h1{font-size:18px}.headerSub{font-size:8.5px}}
+
+
+
+/* ---------- FINAL FIXED SIDE CONTROL RAIL ---------- */
+:root{--side-w:430px;--side-gap:16px;--header-h:88px}
+.pageMain{padding-right:calc(var(--side-w) + var(--side-gap));width:100%;min-height:calc(100vh - var(--header-h))}
+.visualSection{width:calc(100% - 28px);max-width:none;margin-left:14px;margin-right:14px}
+.magnifiedSection{width:calc(100% - 28px);max-width:none;margin-left:14px;margin-right:14px}
+.controlsSection{position:fixed;right:14px;top:calc(var(--header-h) + var(--side-gap));bottom:14px;width:var(--side-w);margin:0;z-index:90;pointer-events:none}
+.controlsSection .panel{pointer-events:auto;position:relative;left:auto;top:auto;width:100%;height:100%;max-height:none;overflow:auto;margin:0}
+.controlsSection .head{position:sticky;top:-14px;z-index:10;padding-top:4px}
+.controlsSection .body{padding-bottom:18px}
+.controlsSection .panel.collapsed{width:58px;height:58px;overflow:hidden;padding:7px;margin-left:auto;border-radius:16px}
+.controlsSection .panel.collapsed .head{position:relative;top:auto;padding:0;border-bottom:0;height:44px;background:transparent}
+.controlsSection .panel.collapsed .body{display:none}
+.controlsSection .panel.collapsed #collapse{width:44px;height:44px;min-height:44px;padding:0;border-radius:12px;font-size:17px;display:flex;align-items:center;justify-content:center}
+.controlsSection.collapsedRail{width:58px}
+
+/* Keep the magnified analysis directly in the main reading column. */
+.magnifiedSection #inset{width:100%;}
+
+@media(min-width:1500px){
+  :root{--side-w:470px;--side-gap:18px}
+  .controlsSection .controlGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .controlsSection .visibilitySec .controlGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:1180px) and (min-width:901px){
+  :root{--side-w:370px;--side-gap:12px}
+  .controlsSection .controlGrid,.controlsSection .visibilitySec .controlGrid{grid-template-columns:1fr}
+  .controlsSection .viewsSec .grid3{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:900px){
+  :root{--side-w:340px;--side-gap:10px}
+  .pageMain{padding-right:0}
+  .controlsSection{left:10px;right:auto;top:calc(var(--header-h) + 10px);bottom:10px;width:var(--side-w);}
+  .controlsSection .controlGrid,.controlsSection .visibilitySec .controlGrid{grid-template-columns:1fr 1fr}
+  .controlsSection .viewsSec .grid3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .controlsSection.collapsedRail{width:58px}
+}
+@media(max-width:620px){
+  :root{--side-w:calc(100vw - 16px)}
+  .visualSection{width:calc(100% - 16px);margin-left:8px;margin-right:8px;min-height:430px;height:58vh}
+  .magnifiedSection{width:calc(100% - 16px);margin-left:8px;margin-right:8px}
+  .controlsSection{left:8px;right:8px;width:auto;top:calc(var(--header-h) + 8px);bottom:8px}
+  .controlsSection .controlGrid,.controlsSection .visibilitySec .controlGrid,.controlsSection .grid2{grid-template-columns:1fr}
+  .controlsSection .viewsSec .grid3{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .controlsSection .actionbar{grid-template-columns:1fr 1fr}
+  .controlsSection.collapsedRail{left:auto;right:8px;width:58px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="siteHeader" id="siteHeader">
+    <div class="headerInner">
+      <div class="brandBlock">
+        <div class="eyebrow">MILKY WAY • UNIFIED FACTUAL 3D DYNAMICS</div>
+        <h1>Absolute Solar-System Corkscrew Motion</h1>
+        <div class="headerSub">Galactic orbit + vertical oscillation • moving Sun • 8 planets carried with the Sun • separate purple solar axial spin • fixed side control rail</div>
+      </div>
+      <div id="modeStrip" aria-live="polite">
+        <span id="modeStripView">ABSOLUTE CORKSCREW</span><span class="modeDot">•</span>
+        <span id="modeStripVertical">4-WAVE TEACHING</span><span class="modeDot">•</span>
+        <span id="modeStripPlanets">8 PLANETS</span><span class="modeDot">•</span>
+        <span id="modeStripCarrier">SUN + PLANETS CARRIED TOGETHER</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="pageMain" aria-label="Simulation layout: fixed heading, main visual, magnified local dynamics, fixed side control rail">
+    <section class="visualSection" id="visualSection" aria-label="Main 3D visual area">
+      <div id="loading">INITIALIZING OFFLINE WEBGL • 25,000 NODES</div>
+      <canvas id="gl"></canvas>
+      <div id="vignette"></div>
+      <div id="stats"></div>
+      <div id="help">Drag = 3D rotate • Shift-drag / right-drag = pan • Wheel = zoom<br>Use ABSOLUTE CORKSCREW for combined Sun + planet paths • PURPLE = Sun axial spin</div>
+      <div id="caption">25,000-node WebGL • absolute planetary corkscrew • purple Sun axial spin • velocity diagnostics</div>
+    </section>
+
+    <section class="magnifiedSection" id="magnifiedSection" aria-label="Unified local dynamics magnified area">
+      <div class="sectionHeading">
+        <div>UNIFIED LOCAL DYNAMICS • MAGNIFIED</div>
+        <span>Absolute transport + planetary orbits + solar axial spin + velocity diagnostics</span>
+      </div>
+      <div id="inset">
+        <div class="ititle">UNIFIED LOCAL DYNAMICS • MAGNIFIED</div>
+        <div class="isub">Absolute transport + planetary orbits + solar axial spin</div>
+        <div class="tabs" aria-label="Unified analysis views"><button data-tab="planets" class="active">PLANETS</button><button data-tab="absolute">ABSOLUTE 3D</button><button data-tab="corkscrew">CORKSCREW</button><button data-tab="spin">SUN SPIN</button><button data-tab="velocity">VELOCITY S</button></div>
+        <canvas id="insetCanvas"></canvas>
+      </div>
+    </section>
+
+    <section class="controlsSection" id="controlsSection" aria-label="Fixed dynamic control grid">
+      <div class="panel" id="panel">
+        <div class="head"><b>Control Center • Fixed Side Grid</b><span class="tag">25K • OFFLINE WEBGL</span><button id="collapse" aria-label="Minimize control panel" title="Minimize control panel">−</button></div>
+        <div class="body">
+    <div class="sec viewsSec" style="margin-top:0">
+      <div class="controlTitle">Views • fixed aligned matrix</div>
+      <div class="grid3">
+        <button class="active" data-view="full">Full Galaxy</button><button data-view="face">Face-on</button><button data-view="oblique">Oblique</button>
+        <button data-view="edge">Edge-on</button><button data-view="under">Under</button><button data-view="solar">Solar Focus</button>
+        <button data-view="corkscrew">Absolute Corkscrew</button><button data-view="system">Solar System</button><button data-view="spin">Sun Spin</button>
+        <button data-view="warp">Warp Profile</button><button data-view="vel">Velocity View</button><button data-view="full2">Reset Angle</button>
+      </div>
+    </div>
+
+    <div class="sec motionSec">
+      <div class="controlTitle">Physical + teaching motion</div>
+      <div class="controlGrid">
+      <div class="row"><label>Galaxy rotation <span class="val" id="galV">1.00×</span></label><input id="galaxySpeed" type="range" min="0" max="2" step=".01" value="1"></div>
+      <div class="row"><label>Solar Galactic speed <span class="val" id="solarV">1.00×</span></label><input id="solarSpeed" type="range" min="0" max="2" step=".01" value="1"></div>
+      <div class="row"><label>Planet rate <span class="val" id="planetV">1.00×</span></label><input id="planetSpeed" type="range" min=".05" max="5" step=".05" value="1"></div>
+      <div class="row"><label>Sun axial spin <span class="val" id="spinV">1.00×</span></label><input id="sunSpinSpeed" type="range" min="0" max="5" step=".05" value="1"></div>
+      <div class="row"><label>Vertical model <span class="val" id="vmV">87.8 Myr</span></label>
+        <select id="verticalModel" style="width:100%;padding:6px;border-radius:7px;background:#0b1320;color:#e9f1ff;border:1px solid rgba(255,255,255,.14)">
+          <option value="research">Research harmonic • 87.8 ± 10.6 Myr</option>
+          <option value="fourwave">4-wave teaching • 57.5 Myr = 230/4</option>
+          <option value="illustrative">Illustrative • 60 Myr</option>
+        </select>
+      </div>
+      <div class="row"><label>Motion coupling <span class="val" id="coupleV">PHYSICAL</span></label>
+        <select id="motionMode" style="width:100%;padding:6px;border-radius:7px;background:#0b1320;color:#e9f1ff;border:1px solid rgba(255,255,255,.14)">
+          <option value="physical">Physical shared-time</option>
+          <option value="teaching">Teaching accelerated local time</option>
+        </select>
+      </div>
+      <div class="row"><label>Solar vertical display scale <span class="val" id="zV">7.0×</span></label><input id="zScale" type="range" min="1" max="15" step=".1" value="7"></div>
+      <div class="row"><label>Planetary orbit display scale <span class="val" id="psV">1.35×</span></label><input id="planetScale" type="range" min=".7" max="3.2" step=".05" value="1.35"></div>
+      <div class="row"><label>Planet visual size <span class="val" id="planetSizeV">2.5×</span></label><input id="planetSize" type="range" min=".5" max="10" step=".1" value="2.5"></div>
+      <div class="row"><label>Sun visual size <span class="val" id="sunSizeV">2.5×</span></label><input id="sunSize" type="range" min=".5" max="10" step=".1" value="2.5"></div>
+      <div class="row"><label>Four-wave visual amplitude <span class="val" id="fourAmpV">1.00×</span></label><input id="fourAmp" type="range" min=".2" max="3" step=".05" value="1"></div>
+      <div class="row"><label>Teaching planet time <span class="val" id="teachTimeV">5.0 yr/Myr</span></label><input id="teachTime" type="range" min="0.5" max="20" step="0.5" value="5"></div>
+      <div class="row"><label>Corkscrew trail span <span class="val" id="corkSpanV">230 Myr</span></label><input id="corkSpan" type="range" min="20" max="230" step="5" value="230"></div>
+      </div>
+    </div>
+
+    <div class="sec galaxySec">
+      <div class="controlTitle">Galaxy dynamics</div>
+      <div class="controlGrid">
+      <div class="row"><label>Warp amplitude <span class="val" id="warpV">1.00×</span></label><input id="warpAmp" type="range" min="0" max="3" step=".01" value="1"></div>
+      <div class="row"><label>Warp precession <span class="val" id="preV">1.00×</span></label><input id="warpSpeed" type="range" min="0" max="3" step=".01" value="1"></div>
+      <div class="row"><label>Bar pattern speed <span class="val" id="barV">1.00×</span></label><input id="barSpeed" type="range" min="0" max="2" step=".05" value="1"></div>
+      <div class="row"><label>Stellar swarm rate <span class="val" id="swarmV">1.00×</span></label><input id="swarmSpeed" type="range" min="0" max="2" step=".05" value="1"></div>
+      </div>
+    </div>
+
+    <div class="sec visibilitySec">
+      <div class="controlTitle">Visibility layers</div>
+      <div class="controlGrid">
+      <label class="chk"><input id="nodesOn" type="checkbox" checked> Show 25,000 galaxy nodes</label>
+      <label class="chk"><input id="haloOn" type="checkbox" checked> Show halo nodes</label>
+      <label class="chk"><input id="barOn" type="checkbox" checked> Show rotating bar / boxy-peanut core</label>
+      <label class="chk"><input id="warpOn" type="checkbox" checked> Show outer-disc warp</label>
+      <label class="chk"><input id="planeOn" type="checkbox" checked> Show Galactic mid-plane</label>
+      <label class="chk"><input id="sunTrail" type="checkbox" checked> Show Sun full Galactic track</label>
+      <label class="chk"><input id="solarVector" type="checkbox" checked> Show Sun vertical vector</label>
+      <label class="chk"><input id="planetOrbitOn" type="checkbox" checked> Show local planetary orbit reference</label>
+      <label class="chk"><input id="planetTrailOn" type="checkbox" checked> Show absolute planet trails</label>
+      <label class="chk"><input id="absoluteOn" type="checkbox" checked> Show absolute corkscrew paths</label>
+      <label class="chk"><input id="spinOn" type="checkbox" checked> Show Sun axial spin • PURPLE</label>
+      <label class="chk"><input id="frameOn" type="checkbox" checked> Show heliocentric local frame</label>
+      <label class="chk"><input id="planetOn" type="checkbox" checked> Show eight planets</label>
+      <div class="row"><label>Node size <span class="val" id="nodeSizeV">1.80×</span></label><input id="nodeSize" type="range" min=".5" max="4" step=".05" value="1.8"></div>
+      <div class="row"><label>Node brightness <span class="val" id="nodeAlphaV">1.00×</span></label><input id="nodeAlpha" type="range" min=".05" max="2" step=".05" value="1"></div>
+      </div>
+    </div>
+
+    <div class="sec cameraSec">
+      <div class="controlTitle">Camera + actions</div>
+      <label class="chk"><input id="autoCamera" type="checkbox"> Auto-rotate camera</label>
+      <div class="row"><label>Camera rotation <span class="val" id="camSpeedV">1.00×</span></label><input id="camSpeed" type="range" min=".05" max="3" step=".05" value="1"></div>
+      <div class="grid2"><button id="play" class="active">Pause</button><button id="reset">Reset</button><button id="fit">Fit Galaxy</button><button id="center">Center Sun</button></div>
+      <div class="actionbar" style="margin-top:7px"><button id="focusCore">Focus Core</button><button id="focusCorkscrew">Focus Corkscrew</button><button id="focusSun">Focus Sun</button></div>
+      <div class="actionbar" style="margin-top:7px"><button id="savePNG">Save PNG</button><button id="toggleInset">Toggle Inset</button><button id="demo">Run Demo</button></div>
+    </div>
+
+    <div class="sec tiny">
+      <b>Physical model</b><br>
+      The Galactic Center is the reference origin. The Sun is placed at R₀ ≈ 8.2 kpc and given a representative ≈230 Myr Galactic orbital period. The planets are translated with the moving Sun, so their absolute trajectories are nested paths rather than circles around a fixed Galactic origin. The Sun’s vertical motion is modeled harmonically in the research mode using Pz ≈ 87.8 Myr, z₀ ≈ +20.8 pc and W ≈ +7.25 km/s.<br><br>
+      <b>Important visual distinction</b><br>
+      The research mode is the factual harmonic mode. The 4-wave mode forces four vertical oscillations during one 230 Myr teaching orbit by using 57.5 Myr. That is a mathematical teaching construction, not a claim that the Sun is observed to complete exactly four vertical waves per Galactic orbit. The resulting corkscrew appearance is wave-like rather than a perfect constant-pitch helix.<br><br>
+      <b>Sun rotation</b><br>
+      The purple layer represents the Sun’s axial rotation as a separate local motion. It is not the Sun’s Galactic orbit. The visualization uses the Sun’s differential-rotation period approximately 25 days at the equator and 36 days near the poles, with the 7.25° solar-spin-axis tilt represented schematically.<br><br>
+      <b>Absolute Solar-System corkscrew</b><br>In the corkscrew view, the Galactic Center remains the fixed reference while the Sun follows its Galactic orbital motion with vertical oscillation. Every planet is positioned as Sun(t) plus its heliocentric Keplerian vector, so the planets are physically transported with the moving Sun. Their small heliocentric orbits are therefore nested inside the large-scale wave-like carrier path rather than drawn around a stationary Sun.<br><br>
+      <b>Planetary realism</b><br>
+      The eight planets use nominal semi-major axes, eccentricities, inclinations and sidereal periods with Kepler-equation propagation. Their absolute position is the sum of the moving Sun’s Galactic position and the heliocentric planet position. Planet sizes and local orbit dimensions are deliberately enlarged for visibility. This is not a real-time ephemeris or N-body integration.<br><br>
+      <b>Galaxy structure</b><br>
+      The 25,000 stellar nodes are deterministic visualization samples. The bar/boxy-peanut core, spiral density structure, halo and outer warp are schematic. Warp precession is shown as an outer-disc structural diagnostic and must not be confused with the Sun’s local vertical oscillation.
+    
+        </div>
+      </div>
+    </section>
+
+  </main>
+  <div id="toast"></div>
+</div>
+
+<script>
+'use strict';
+(() => {
+  const glCanvas = document.getElementById('gl');
+  const gl = glCanvas.getContext('webgl', {alpha:false, antialias:true});
+  if(!gl){ document.getElementById('loading').textContent='WebGL not available in this browser. Use a current Chrome, Edge, Firefox, or Safari.'; return; }
+
+  const TAU=Math.PI*2, DEG=Math.PI/180;
+  const N=25000;
+  const RMAX=17.5, R0=8.20;
+  const PPHI=230.0;
+  const PZ_RESEARCH=87.8;
+  const PZ_SIGMA=10.6;
+  const PZ_FOURWAVE=PPHI/4.0; // 57.5 Myr teaching construction
+  const PZ_ILL=60.0;
+  const Z0_PC=20.8, W0=7.25;
+  const PC_PER_KMS_MYR=1.022712165;
+  const ECL=60.2*DEG;
+  const SOLAR_SPIN_EQUATOR_D=25.0, SOLAR_SPIN_POLE_D=36.0, SOLAR_SPIN_TILT=7.25*DEG;
+  const WARP_PRECESS=650.0;
+  const WARP_REF_AMP=0.85;
+  const GAL_SCALE_LY=114000;
+  const BAR_PATTERN=41.0;
+  const planetData=[
+    ['Mercury',0.387098,ecc(0.205635),7.005,87.969,'#b7b7b7',0.10],
+    ['Venus',0.723332,ecc(0.006772),3.3947,224.701,'#e5b76a',0.88],
+    ['Earth',1.000000,ecc(0.0167086),0.0,365.256,'#5eb8ff',1.67],
+    ['Mars',1.523679,ecc(0.0934),1.850,686.980,'#df7d58',2.45],
+    ['Jupiter',5.20260,ecc(0.0489),1.304,4332.59,'#d8bb8d',3.18],
+    ['Saturn',9.55491,ecc(0.0565),2.485,10759.22,'#e0c889',4.10],
+    ['Uranus',19.2184,ecc(0.0463),0.773,30688.5,'#86d7d7',5.10],
+    ['Neptune',30.1104,ecc(0.0095),1.770,60182.0,'#728fff',5.72]
+  ];
+  function ecc(v){ return v; }
+
+  const state={
+    run:true, gal:1, warp:1, pre:1, solar:1, planet:1, sunSpin:1,
+    vm:'research', motion:'physical', zScale:7, fourAmp:1,
+    warpOn:true, sunTrail:true, planeOn:true, barOn:true, solarVector:true,
+    nodesOn:true, haloOn:true, planetOrbitOn:true, planetTrailOn:true, absoluteOn:true,
+    spinOn:true, frameOn:true, planetOn:true,
+    nodeSize:1.8, nodeAlpha:1, autoCamera:false, camSpeed:1, barSpeed:1, swarmSpeed:1,
+    view:'full', tab:'corkscrew', planetScale:1.35, planetSize:2.5, sunSize:2.5, teachYearsPerMyr:5, corkscrewTrailMyr:230
+  };
+
+  function rand(seed){ let x=seed>>>0; return ()=>{ x+=0x6D2B79F5; x=Math.imul(x^(x>>>15),x|1); x^=x+Math.imul(x^(x>>>7),x|61); return ((x^(x>>>14))>>>0)/4294967296; } }
+  const R=rand(20261003);
+
+  // ---------- orbital / physical helpers ----------
+  const OMEGA_Z_RESEARCH = TAU/PZ_RESEARCH;
+  const ZVEL_PC_MYR = W0*PC_PER_KMS_MYR;
+  const A_RESEARCH = Math.sqrt(Z0_PC*Z0_PC + Math.pow(ZVEL_PC_MYR/OMEGA_Z_RESEARCH,2));
+  function getVerticalModel(){
+    if(state.vm==='fourwave') return {Pz:PZ_FOURWAVE, A:A_RESEARCH*state.fourAmp, label:'4-wave teaching'};
+    if(state.vm==='illustrative') return {Pz:PZ_ILL, A:106.0, label:'illustrative'};
+    return {Pz:PZ_RESEARCH, A:A_RESEARCH, label:'research harmonic'};
+  }
+  function solarState(T){
+    const vm=getVerticalModel();
+    const omega=TAU/vm.Pz;
+    const phase0 = (state.vm==='research') ? Math.atan2(Z0_PC,ZVEL_PC_MYR/omega) : Math.PI*0.11;
+    const phase=omega*T+phase0;
+    const z=vm.A*Math.sin(phase);
+    const az=TAU*T/(PPHI/state.solar);
+    const verticalVel=vm.A*omega*Math.cos(phase);
+    return {az,z,Pz:vm.Pz,A:vm.A,phase,verticalVel};
+  }
+  function solarPos(T){
+    const s=solarState(T);
+    const visualY=(s.z/1000)*state.zScale;
+    return [R0*Math.cos(s.az),visualY,R0*Math.sin(s.az)];
+  }
+  function keplerE(M,e){
+    let E=M;
+    for(let k=0;k<8;k++) E -= (E-e*Math.sin(E)-M)/(1-e*Math.cos(E));
+    return E;
+  }
+  function planetYearsAt(t){
+    if(state.motion==='physical') return t*1000000.0;
+    // Teaching mode keeps the local planetary motion visible while the
+    // Galactic carrier advances on a Myr clock. This changes display timing,
+    // not the relative orbital periods or Keplerian geometry.
+    return planetClockYears + (t-T)*state.teachYearsPerMyr;
+  }
+  function planetLocal(j,T,display=true){
+    const [name,a,e,incDeg,periodDays,col,phase0]=planetData[j];
+    const years=planetYearsAt(T);
+    const M=TAU*(years/(periodDays/365.256))+phase0;
+    const E=keplerE(M,e);
+    const xOrb=a*(Math.cos(E)-e);
+    const yOrb=a*Math.sqrt(1-e*e)*Math.sin(E);
+    const inc=incDeg*DEG;
+    // Rotate the orbital plane by its nominal inclination, then place the system in the Galactic frame.
+    const y1=-yOrb*Math.sin(inc), z1=yOrb*Math.cos(inc);
+    const sy=Math.sin(ECL), cy=Math.cos(ECL);
+    const y2=y1*cy-z1*sy;
+    const z2=y1*sy+z1*cy;
+    const localScale=(display ? ((state.view==='solar'||state.view==='corkscrew'||state.view==='system')?0.72:0.30)*state.planetScale : 1.0);
+    // AU is not commensurate with kpc; this is a visibility-preserving local magnification for the rendered overlay.
+    const sc=localScale/30.1104;
+    return [xOrb*sc,y2*sc,z2*sc];
+  }
+  function planet3DPositions(T){
+    const sp=solarPos(T), out=[];
+    for(let j=0;j<planetData.length;j++){
+      const p=planetLocal(j,T,true);
+      out.push([sp[0]+p[0],sp[1]+p[1],sp[2]+p[2]]);
+    }
+    return out;
+  }
+  function warpY(r,th,T){
+    if(r<7) return 0;
+    const f=Math.max(0,Math.min(1,(r-7)/(RMAX-7)));
+    const phase=TAU*T/WARP_PRECESS*state.pre;
+    const amp=WARP_REF_AMP*state.warp;
+    return amp*(Math.pow(f,1.65)*Math.sin(th-phase)+0.13*Math.pow(f,1.25)*Math.sin(2*th+0.65*phase));
+  }
+
+  // ---------- galaxy data ----------
+  const gx=new Float32Array(N), gy=new Float32Array(N), gz=new Float32Array(N);
+  const gs=new Float32Array(N), gr=new Float32Array(N), gg=new Float32Array(N), gb=new Float32Array(N);
+  const kind=new Uint8Array(N), phaseBase=new Float32Array(N), orbitRate=new Float32Array(N);
+
+  function gauss(){
+    return Math.sqrt(-2*Math.log(Math.max(1e-9,R())))*Math.cos(TAU*R());
+  }
+  function setStar(i,x,y,z,size,k,ph,rate,rgb){
+    gx[i]=x;gy[i]=y;gz[i]=z;gs[i]=size;kind[i]=k;phaseBase[i]=ph;orbitRate[i]=rate;
+    gr[i]=rgb[0];gg[i]=rgb[1];gb[i]=rgb[2];
+  }
+  function colorDisk(r){
+    const f=Math.max(0,1-r/RMAX);
+    if(R()<0.08) return [1.0,0.82+0.12*f,0.55+0.28*f];
+    return [0.50+0.38*f,0.66+0.26*f,0.90+0.10*f];
+  }
+
+  const DISK=19000, BULGE=4500, HALO=N-DISK-BULGE;
+  for(let i=0;i<DISK;i++){
+    const r=RMAX*Math.pow(R(),0.62);
+    const arm=(i%4)*TAU/4;
+    const base=arm + 0.34*Math.sqrt(Math.max(.01,r));
+    const th=base + 0.37*gauss();
+    const rr=Math.max(.05,r+0.18*gauss());
+    const thickness=(0.032+0.23*Math.exp(-rr/5.4))*gauss();
+    setStar(i,rr*Math.cos(th),thickness,rr*Math.sin(th),0.35+1.35*(1-rr/RMAX)*(.7+R()),0,th,2.0/(.72+rr),colorDisk(rr));
+  }
+  for(let i=0;i<BULGE;i++){
+    const th=R()*TAU;
+    // boxy-peanut / triaxial distribution
+    const x=(R()*2-1)*2.65*(0.6+0.45*R());
+    const z=(R()*2-1)*1.0*(0.78+0.40*R());
+    const y=(1.0+0.22*Math.cos(2*th))*gauss();
+    setStar(DISK+i,x,y,z,0.9+2.6*R(),1,th,0.52+0.18*R(),[0.98,0.62+0.25*R(),0.34+0.2*R()]);
+  }
+  for(let i=0;i<HALO;i++){
+    const u=R()*2-1,a=R()*TAU,rr=7+10.5*R(),s=Math.sqrt(Math.max(0,1-u*u));
+    setStar(DISK+BULGE+i,rr*s*Math.cos(a),rr*u*1.0,rr*s*Math.sin(a),0.25+0.55*R(),2,a,0.26/(.75+rr),[0.48+0.15*R(),0.55+0.18*R(),0.70+0.20*R()]);
+  }
+
+  // ---------- WebGL setup ----------
+  const vs=`
+    attribute vec3 aPos;
+    attribute vec3 aColor;
+    uniform mat4 uMVP;
+    uniform float uPointSize;
+    uniform float uNodeAlpha;
+    varying vec3 vColor;
+    varying float vAlpha;
+    void main(){
+      gl_Position=uMVP*vec4(aPos,1.0);
+      float depth=clamp(1.25/(0.55+gl_Position.w*0.006),0.35,1.4);
+      gl_PointSize=max(1.0,uPointSize*depth);
+      vColor=aColor; vAlpha=(0.45+0.55*depth)*uNodeAlpha;
+    }`;
+  const fs=`
+    precision mediump float;
+    varying vec3 vColor;
+    varying float vAlpha;
+    void main(){
+      vec2 p=gl_PointCoord*2.0-1.0;
+      float d=dot(p,p);
+      if(d>1.0) discard;
+      float glow=smoothstep(1.0,0.04,d);
+      gl_FragColor=vec4(vColor,glow*vAlpha);
+    }`;
+
+  function compile(type,src){
+    const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);
+    if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+    return s;
+  }
+  const prog=gl.createProgram();
+  gl.attachShader(prog,compile(gl.VERTEX_SHADER,vs));
+  gl.attachShader(prog,compile(gl.FRAGMENT_SHADER,fs));
+  gl.linkProgram(prog);
+  if(!gl.getProgramParameter(prog,gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+  gl.useProgram(prog);
+  const loc={pos:gl.getAttribLocation(prog,'aPos'),color:gl.getAttribLocation(prog,'aColor'),mvp:gl.getUniformLocation(prog,'uMVP'),size:gl.getUniformLocation(prog,'uPointSize'),nodeAlpha:gl.getUniformLocation(prog,'uNodeAlpha')};
+
+  const posBuffer=gl.createBuffer(), colorBuffer=gl.createBuffer();
+  const renderPos=new Float32Array(N*3);
+  function updateGalaxyPositions(T){
+    for(let i=0;i<N;i++){
+      const x0=gx[i], y0=gy[i], z0=gz[i];
+      let x,y,z;
+      if(kind[i]===0){
+        const r=Math.hypot(x0,z0);
+        const th=phaseBase[i]+T*state.gal*state.swarmSpeed*orbitRate[i];
+        x=r*Math.cos(th); z=r*Math.sin(th); y=y0+(state.warpOn?warpY(r,th,T):0);
+      }else if(kind[i]===1){
+        const ang=T*state.gal*0.44*state.barSpeed, c=Math.cos(ang), s=Math.sin(ang);
+        x=x0*c-z0*s; z=x0*s+z0*c; y=y0 + 0.20*Math.sin(2*phaseBase[i]+T*0.35);
+      }else{
+        const r=Math.hypot(x0,z0), th=phaseBase[i]+T*state.gal*orbitRate[i];
+        x=r*Math.cos(th); z=r*Math.sin(th); y=y0*0.55;
+      }
+      const j=i*3;renderPos[j]=x;renderPos[j+1]=y;renderPos[j+2]=z;
+    }
+    gl.bindBuffer(gl.ARRAY_BUFFER,posBuffer);gl.bufferData(gl.ARRAY_BUFFER,renderPos,gl.DYNAMIC_DRAW);
+  }
+  const packedColors=new Float32Array(N*3);
+  function mergeColors(){
+    for(let i=0;i<N;i++){packedColors[i*3]=gr[i];packedColors[i*3+1]=gg[i];packedColors[i*3+2]=gb[i]}
+    return packedColors;
+  }
+  mergeColors();
+
+  // simple 4x4 matrix math
+  function mul4(a,b){
+    const o=new Float32Array(16);
+    for(let c=0;c<4;c++)for(let r=0;r<4;r++)o[c*4+r]=a[r]*b[c*4]+a[4+r]*b[c*4+1]+a[8+r]*b[c*4+2]+a[12+r]*b[c*4+3];
+    return o;
+  }
+  function perspective(fov,aspect,near,far){
+    const f=1/Math.tan(fov/2), nf=1/(near-far);
+    return new Float32Array([f/aspect,0,0,0,0,f,0,0,0,0,(far+near)*nf,-1,0,0,(2*far*near)*nf,0]);
+  }
+  function lookAt(eye,target,up){
+    let zx=eye[0]-target[0],zy=eye[1]-target[1],zz=eye[2]-target[2];
+    let zl=Math.hypot(zx,zy,zz);zx/=zl;zy/=zl;zz/=zl;
+    let xx=up[1]*zz-up[2]*zy,xy=up[2]*zx-up[0]*zz,xz=up[0]*zy-up[1]*zx;
+    let xl=Math.hypot(xx,xy,xz);xx/=xl;xy/=xl;xz/=xl;
+    const yx=zy*xz-zz*xy, yy=zz*xx-zx*xz, yz=zx*xy-zy*xx;
+    return new Float32Array([xx,yx,zx,0,xy,yy,zy,0,xz,yz,zz,0,
+      -(xx*eye[0]+xy*eye[1]+xz*eye[2]),
+      -(yx*eye[0]+yy*eye[1]+yz*eye[2]),
+      -(zx*eye[0]+zy*eye[1]+zz*eye[2]),1]);
+  }
+
+  const visualStage=document.getElementById('visualSection');
+  let W=Math.max(1,visualStage.clientWidth),H=Math.max(1,visualStage.clientHeight);
+  function resize(){
+    W=Math.max(1,visualStage.clientWidth);H=Math.max(1,visualStage.clientHeight);const d=Math.min(devicePixelRatio||1,2);
+    glCanvas.width=Math.floor(W*d);glCanvas.height=Math.floor(H*d);
+    gl.viewport(0,0,glCanvas.width,glCanvas.height);
+  }
+  addEventListener('resize',resize);
+  if(window.ResizeObserver){ new ResizeObserver(resize).observe(visualStage); }
+  resize();
+
+  let yaw=28*DEG,pitch=24*DEG,distance=44,target=[0,0,0];
+  function viewPreset(v){
+    state.view=v;
+    if(v==='full'){yaw=28*DEG;pitch=24*DEG;distance=44;target=[0,0,0]}
+    if(v==='face'){yaw=0;pitch=82*DEG;distance=43;target=[0,0,0]}
+    if(v==='oblique'){yaw=48*DEG;pitch=38*DEG;distance=42;target=[0,0,0]}
+    if(v==='edge'){yaw=0;pitch=4*DEG;distance=42;target=[0,0,0]}
+    if(v==='under'){yaw=180*DEG;pitch=-28*DEG;distance=42;target=[0,0,0]}
+    if(v==='solar'){yaw=38*DEG;pitch=14*DEG;distance=9.8;const s=solarPos(T);target=[s[0],s[1],s[2]]}
+    if(v==='corkscrew'){yaw=34*DEG;pitch=22*DEG;distance=18;target=[0,0,0];state.vm='fourwave';state.motion='teaching';state.absoluteOn=true;document.getElementById('verticalModel').value='fourwave';document.getElementById('motionMode').value='teaching';document.getElementById('vmV').textContent='57.5 Myr';document.getElementById('coupleV').textContent='TEACHING'}
+    if(v==='system'){yaw=35*DEG;pitch=24*DEG;distance=8.6;const s=solarPos(T);target=[s[0],s[1],s[2]]}
+    if(v==='spin'){yaw=35*DEG;pitch=18*DEG;distance=8.0;const s=solarPos(T);target=[s[0],s[1],s[2]]}
+    if(v==='warp'){yaw=0;pitch=4*DEG;distance=44;target=[0,0,0]}
+    if(v==='vel'){yaw=90*DEG;pitch=8*DEG;distance=44;target=[0,0,0]}
+    if(v==='full2'){yaw=28*DEG;pitch=24*DEG;distance=44;target=[0,0,0]}
+  }
+  // ---------- fixed side-rail header synchronisation ----------
+  const siteHeader=document.getElementById('siteHeader');
+  function syncHeaderHeight(){
+    if(!siteHeader)return;
+    document.documentElement.style.setProperty('--header-h',Math.ceil(siteHeader.getBoundingClientRect().height)+'px');
+  }
+  addEventListener('resize',syncHeaderHeight);
+  if(window.ResizeObserver){ new ResizeObserver(syncHeaderHeight).observe(siteHeader); }
+  syncHeaderHeight();
+
+  // ---------- drawing helpers ----------
+  function modelViewProjection(){
+    const cp=Math.cos(pitch),sp=Math.sin(pitch),cy=Math.cos(yaw),sy=Math.sin(yaw);
+    const eye=[
+      target[0]+distance*cp*sy,
+      target[1]+distance*sp,
+      target[2]+distance*cp*cy
+    ];
+    // keep "up" stable
+    const P=perspective(50*DEG,W/H,0.05,200);
+    const V=lookAt(eye,target,[0,1,0]);
+    return mul4(P,V);
+  }
+
+  function drawLine(points,color,width=1.2){
+    if(points.length<2)return;
+    const arr=new Float32Array(points.length*3);
+    for(let i=0;i<points.length;i++){arr[i*3]=points[i][0];arr[i*3+1]=points[i][1];arr[i*3+2]=points[i][2]}
+    const cb=new Float32Array(points.length*3);
+    for(let i=0;i<points.length;i++){cb[i*3]=color[0];cb[i*3+1]=color[1];cb[i*3+2]=color[2]}
+    gl.bindBuffer(gl.ARRAY_BUFFER,posBuffer);gl.bufferData(gl.ARRAY_BUFFER,arr,gl.DYNAMIC_DRAW);
+    gl.vertexAttribPointer(loc.pos,3,gl.FLOAT,false,0,0);gl.enableVertexAttribArray(loc.pos);
+    gl.bindBuffer(gl.ARRAY_BUFFER,colorBuffer);gl.bufferData(gl.ARRAY_BUFFER,cb,gl.DYNAMIC_DRAW);
+    gl.vertexAttribPointer(loc.color,3,gl.FLOAT,false,0,0);gl.enableVertexAttribArray(loc.color);
+    gl.uniform1f(loc.size,1.2);
+    gl.drawArrays(gl.LINE_STRIP,0,points.length);
+    gl.bindBuffer(gl.ARRAY_BUFFER,posBuffer);gl.bufferData(gl.ARRAY_BUFFER,renderPos,gl.DYNAMIC_DRAW);
+    gl.bindBuffer(gl.ARRAY_BUFFER,colorBuffer);gl.bufferData(gl.ARRAY_BUFFER,packedColors,gl.STATIC_DRAW);
+  }
+
+  const trailCache=[];
+
+  // ---------- 3D Solar System overlay ----------
+  function hexRGB(hex){
+    const n=parseInt(hex.slice(1),16);
+    return [((n>>16)&255)/255,((n>>8)&255)/255,(n&255)/255];
+  }
+  function restoreGalaxyBuffers(){
+    gl.bindBuffer(gl.ARRAY_BUFFER,posBuffer);gl.bufferData(gl.ARRAY_BUFFER,renderPos,gl.DYNAMIC_DRAW);
+    gl.vertexAttribPointer(loc.pos,3,gl.FLOAT,false,0,0);gl.enableVertexAttribArray(loc.pos);
+    gl.bindBuffer(gl.ARRAY_BUFFER,colorBuffer);gl.bufferData(gl.ARRAY_BUFFER,packedColors,gl.STATIC_DRAW);
+    gl.vertexAttribPointer(loc.color,3,gl.FLOAT,false,0,0);gl.enableVertexAttribArray(loc.color);
+  }
+  function drawPlanetObjects(T){
+    if(!state.planetOn) return;
+    const pts=planet3DPositions(T);
+    const arr=new Float32Array(pts.length*3),cb=new Float32Array(pts.length*3);
+    for(let i=0;i<pts.length;i++){
+      arr[i*3]=pts[i][0];arr[i*3+1]=pts[i][1];arr[i*3+2]=pts[i][2];
+      const rgb=hexRGB(planetData[i][5]);cb[i*3]=rgb[0];cb[i*3+1]=rgb[1];cb[i*3+2]=rgb[2];
+    }
+    gl.bindBuffer(gl.ARRAY_BUFFER,posBuffer);gl.bufferData(gl.ARRAY_BUFFER,arr,gl.DYNAMIC_DRAW);
+    gl.vertexAttribPointer(loc.pos,3,gl.FLOAT,false,0,0);gl.enableVertexAttribArray(loc.pos);
+    gl.bindBuffer(gl.ARRAY_BUFFER,colorBuffer);gl.bufferData(gl.ARRAY_BUFFER,cb,gl.DYNAMIC_DRAW);
+    gl.vertexAttribPointer(loc.color,3,gl.FLOAT,false,0,0);gl.enableVertexAttribArray(loc.color);
+    gl.uniform1f(loc.size,(state.view==='solar'||state.view==='system'||state.view==='corkscrew'?5.5:3.1)*state.planetSize);
+    gl.drawArrays(gl.POINTS,0,pts.length);
+    restoreGalaxyBuffers();
+  }
+  function drawPlanetOrbits3D(T){
+    if(!state.planetOrbitOn) return;
+    const sp=solarPos(T);
+    for(let j=0;j<planetData.length;j++){
+      const [name,a,e,incDeg]=planetData[j], pts=[];
+      for(let i=0;i<=220;i++){
+        const M=TAU*i/220;
+        const E=keplerE(M,e);
+        const xOrb=a*(Math.cos(E)-e), yOrb=a*Math.sqrt(1-e*e)*Math.sin(E), inc=incDeg*DEG;
+        const y1=-yOrb*Math.sin(inc),z1=yOrb*Math.cos(inc);
+        const sy=Math.sin(ECL),cy=Math.cos(ECL);
+        const y2=y1*cy-z1*sy,z2=y1*sy+z1*cy;
+        const sc=((state.view==='solar'||state.view==='system'||state.view==='corkscrew')?0.72:0.30)*state.planetScale/30.1104;
+        pts.push([sp[0]+xOrb*sc,sp[1]+y2*sc,sp[2]+z2*sc]);
+      }
+      drawLine(pts,[0.18,0.40,0.62],0.5);
+    }
+  }
+  function drawSunSpin(T){
+    if(!state.spinOn) return;
+    const sp=solarPos(T), r=(state.view==='spin'||state.view==='solar'||state.view==='system'||state.view==='corkscrew')?0.62:0.34;
+    const pts=[];
+    const tilt=SOLAR_SPIN_TILT;
+    for(let i=0;i<=180;i++){
+      const a=TAU*i/180;
+      const x=r*Math.cos(a), y=r*Math.sin(a)*Math.cos(tilt), z=r*Math.sin(a)*Math.sin(tilt);
+      pts.push([sp[0]+x,sp[1]+y,sp[2]+z]);
+    }
+    drawLine(pts,[0.68,0.34,1.0],1.9);
+    const days=(state.motion==='physical')?T*1000000*365.256: sunSpinDays;
+    const phase=TAU*(days/SOLAR_SPIN_EQUATOR_D)*state.sunSpin;
+    const marker=[sp[0]+r*Math.cos(phase),sp[1]+r*Math.sin(phase)*Math.cos(tilt),sp[2]+r*Math.sin(phase)*Math.sin(tilt)];
+    const sb=new Float32Array(marker), scb=new Float32Array([0.72,0.38,1.0]);
+    gl.bindBuffer(gl.ARRAY_BUFFER,posBuffer);gl.bufferData(gl.ARRAY_BUFFER,sb,gl.DYNAMIC_DRAW);
+    gl.vertexAttribPointer(loc.pos,3,gl.FLOAT,false,0,0);gl.enableVertexAttribArray(loc.pos);
+    gl.bindBuffer(gl.ARRAY_BUFFER,colorBuffer);gl.bufferData(gl.ARRAY_BUFFER,scb,gl.DYNAMIC_DRAW);
+    gl.vertexAttribPointer(loc.color,3,gl.FLOAT,false,0,0);gl.enableVertexAttribArray(loc.color);
+    gl.uniform1f(loc.size,6.5*Math.min(4,state.sunSize));gl.drawArrays(gl.POINTS,0,1);
+    restoreGalaxyBuffers();
+  }
+  function drawHeliocentricFrame(T){
+    if(!state.frameOn) return;
+    const sp=solarPos(T);
+    const r=(state.view==='solar'||state.view==='system'||state.view==='corkscrew')?0.95:0.50;
+    drawLine([[sp[0]-r,sp[1],sp[2]],[sp[0]+r,sp[1],sp[2]]],[0.28,0.58,0.95],0.7);
+    drawLine([[sp[0],sp[1]-r,sp[2]],[sp[0],sp[1]+r,sp[2]]],[0.72,0.38,1.0],0.7);
+    drawLine([[sp[0],sp[1],sp[2]-r],[sp[0],sp[1],sp[2]+r]],[0.30,0.88,0.60],0.7);
+  }
+  function drawAbsolutePlanetTrails(T){
+    if(!state.absoluteOn || !state.planetTrailOn) return;
+    const span=(state.view==='corkscrew'||state.tab==='corkscrew')?state.corkscrewTrailMyr:Math.min(2.0,PPHI*0.08);
+    const start=T-span;
+    for(let j=0;j<planetData.length;j++){
+      const [name,a,e,incDeg,periodDays,col]=planetData[j], pts=[];
+      const sc=((state.view==='solar'||state.view==='system'||state.view==='corkscrew')?0.72:0.30)*state.planetScale/30.1104;
+      const count=520;
+      for(let q=0;q<=count;q++){
+        const tPast=start+span*q/count;
+        const sp=solarPos(tPast);
+        const years=planetYearsAt(tPast);
+        const M=TAU*(years/(periodDays/365.256))+planetData[j][6];
+        const E=keplerE(M,e),xOrb=a*(Math.cos(E)-e),yOrb=a*Math.sqrt(1-e*e)*Math.sin(E),inc=incDeg*DEG;
+        const y1=-yOrb*Math.sin(inc),z1=yOrb*Math.cos(inc),sy=Math.sin(ECL),cy=Math.cos(ECL);
+        const y2=y1*cy-z1*sy,z2=y1*sy+z1*cy;
+        pts.push([sp[0]+xOrb*sc,sp[1]+y2*sc,sp[2]+z2*sc]);
+      }
+      const rgb=hexRGB(col);
+      const a1=(state.view==='corkscrew'||state.tab==='corkscrew')?0.82:0.58;
+      drawLine(pts,[Math.min(1,rgb[0]*a1),Math.min(1,rgb[1]*a1),Math.min(1,rgb[2]*0.98)],state.view==='corkscrew'?0.85:0.6);
+    }
+  }
+  function drawSunAndCenter(T){
+    const sp=solarPos(T);
+    const sb=new Float32Array(sp),scb=new Float32Array([1,0.86,0.18]);
+    gl.bindBuffer(gl.ARRAY_BUFFER,posBuffer);gl.bufferData(gl.ARRAY_BUFFER,sb,gl.DYNAMIC_DRAW);
+    gl.vertexAttribPointer(loc.pos,3,gl.FLOAT,false,0,0);gl.enableVertexAttribArray(loc.pos);
+    gl.bindBuffer(gl.ARRAY_BUFFER,colorBuffer);gl.bufferData(gl.ARRAY_BUFFER,scb,gl.DYNAMIC_DRAW);
+    gl.vertexAttribPointer(loc.color,3,gl.FLOAT,false,0,0);gl.enableVertexAttribArray(loc.color);
+    gl.uniform1f(loc.size,(state.view==='solar'||state.view==='spin'||state.view==='system'||state.view==='corkscrew'?15.5:13.5)*state.sunSize);gl.drawArrays(gl.POINTS,0,1);
+    const center=[0,0,0], ccol=new Float32Array([1,0.62,0.22]);
+    gl.bindBuffer(gl.ARRAY_BUFFER,posBuffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(center),gl.DYNAMIC_DRAW);
+    gl.vertexAttribPointer(loc.pos,3,gl.FLOAT,false,0,0);gl.enableVertexAttribArray(loc.pos);
+    gl.bindBuffer(gl.ARRAY_BUFFER,colorBuffer);gl.bufferData(gl.ARRAY_BUFFER,ccol,gl.DYNAMIC_DRAW);
+    gl.vertexAttribPointer(loc.color,3,gl.FLOAT,false,0,0);gl.enableVertexAttribArray(loc.color);
+    gl.uniform1f(loc.size,8.0);gl.drawArrays(gl.POINTS,0,1);
+    restoreGalaxyBuffers();
+  }
+  function drawOverlays(T){
+    const mvp=modelViewProjection();gl.uniformMatrix4fv(loc.mvp,false,mvp);
+    gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE);
+    if(state.planeOn){const pts=[];for(let i=0;i<=512;i++){const a=TAU*i/512;pts.push([RMAX*Math.cos(a),0,RMAX*Math.sin(a)])}drawLine(pts,[0.16,0.40,0.70],1);}
+    if(state.warpOn){const pts=[];for(let i=0;i<=512;i++){const a=TAU*i/512;pts.push([RMAX*Math.cos(a),warpY(RMAX,a,T),RMAX*Math.sin(a)])}drawLine(pts,[0.30,0.94,0.72],1.7);}
+    if(state.sunTrail){
+      const pts=[];
+      const span=(state.view==='corkscrew'||state.tab==='corkscrew')?state.corkscrewTrailMyr:PPHI;
+      const start=T-span*.5;
+      for(let i=0;i<=1200;i++){const tt=start+span*i/1200;pts.push(solarPos(tt));}
+      drawLine(pts,[1.0,0.83,0.24],2.3);
+    }
+    const pz=solarState(T);
+    if(state.solarVector) drawLine([[R0*Math.cos(pz.az),0,R0*Math.sin(pz.az)],solarPos(T)],[1.0,0.68,0.15],1.3);
+    drawSunAndCenter(T);
+    drawSunSpin(T);
+    drawHeliocentricFrame(T);
+    if(state.planetOrbitOn && state.planetOn) drawPlanetOrbits3D(T);
+    drawAbsolutePlanetTrails(T);
+    drawPlanetObjects(T);
+  }
+
+  function drawGalaxy(T){
+    gl.clearColor(0.002,0.004,0.008,1);
+    gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LEQUAL);
+    gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE);
+    const mvp=modelViewProjection();
+    gl.uniformMatrix4fv(loc.mvp,false,mvp);
+    gl.bindBuffer(gl.ARRAY_BUFFER,posBuffer);gl.vertexAttribPointer(loc.pos,3,gl.FLOAT,false,0,0);gl.enableVertexAttribArray(loc.pos);
+    gl.bindBuffer(gl.ARRAY_BUFFER,colorBuffer);gl.vertexAttribPointer(loc.color,3,gl.FLOAT,false,0,0);gl.enableVertexAttribArray(loc.color);
+    gl.uniform1f(loc.nodeAlpha,state.nodesOn?state.nodeAlpha:0);
+    gl.uniform1f(loc.size,state.nodeSize);
+    if(state.nodesOn){
+      gl.drawArrays(gl.POINTS,0,DISK);
+      if(state.barOn) gl.drawArrays(gl.POINTS,DISK,BULGE);
+      if(state.haloOn) gl.drawArrays(gl.POINTS,DISK+BULGE,HALO);
+    }
+    gl.uniform1f(loc.nodeAlpha,1);
+    drawOverlays(T);
+
+    if(state.view==='vel'){
+      // A compact projected velocity S-curve is drawn in screen space by the inset;
+      // the main view remains the real 3D galaxy so geometry is not confused with kinematics.
+    }
+  }
+
+  // ---------- inset ----------
+  const inset=document.getElementById('insetCanvas'),ictx=inset.getContext('2d');
+  function resizeInset(){const d=Math.min(devicePixelRatio||1,2);inset.width=Math.floor(inset.clientWidth*d);inset.height=Math.floor(inset.clientHeight*d);ictx.setTransform(d,0,0,d,0,0);}
+  addEventListener('resize',resizeInset);
+  if(window.ResizeObserver){ new ResizeObserver(resizeInset).observe(document.getElementById('inset')); }
+  resizeInset();
+  function bgInset(w,h){const g=ictx.createRadialGradient(w*.5,h*.52,2,w*.5,h*.52,Math.max(w,h)*.60);g.addColorStop(0,'#0b1422');g.addColorStop(1,'#02060b');ictx.fillStyle=g;ictx.fillRect(0,0,w,h);}
+  function drawPlanetInset(w,h,T){
+    const cx=w*.5,cy=h*.57, pr=a=>12+17*Math.sqrt(a/30.1104*30.1104);
+    ictx.strokeStyle='rgba(116,159,206,.28)';ictx.lineWidth=1;ictx.save();ictx.translate(cx,cy);
+    for(let j=0;j<planetData.length;j++){const a=planetData[j][1],rr=pr(a);ictx.beginPath();ictx.ellipse(0,0,rr,rr*Math.cos(ECL),0,0,TAU);ictx.stroke();}
+    ictx.restore(); ictx.font='8px ui-monospace,monospace';
+    const years=planetYearsAt(T);
+    for(let j=0;j<planetData.length;j++){
+      const [name,a,e,inc,period,col,phase0]=planetData[j],rr=pr(a),M=TAU*(years/(period/365.256))+phase0,E=keplerE(M,e);
+      const x=cx+rr*(Math.cos(E)-e),y=cy+rr*(Math.sqrt(1-e*e)*Math.sin(E))*Math.cos(ECL);
+      ictx.fillStyle=col;ictx.shadowBlur=10;ictx.shadowColor=col;ictx.beginPath();ictx.arc(x,y,j<4?2.5:3.3,0,TAU);ictx.fill();ictx.shadowBlur=0;if(j===2){ictx.fillStyle='#eaf5ff';ictx.fillText('Earth',x+6,y-4)}
+    }
+    ictx.fillStyle='#ffd84b';ictx.shadowBlur=18;ictx.shadowColor='#ffd84b';ictx.beginPath();ictx.arc(cx,cy,7,0,TAU);ictx.fill();ictx.shadowBlur=0;
+    ictx.fillStyle='#93a7bc';ictx.fillText('Keplerian local motion • 8 planets • enlarged display',10,h-10);
+  }
+  function drawAbsoluteInset(w,h,T){
+    const cx=w*.5,cy=h*.57,scale=Math.min(w,h)*.17;
+    ictx.strokeStyle='rgba(74,182,255,.32)';ictx.lineWidth=1.05;ictx.beginPath();
+    for(let i=0;i<=520;i++){const q=TAU*i/520,t=T-PPHI*.75*i/520,s=solarState(t),x=Math.cos(s.az)*scale,y=(s.z/1000)*state.zScale*scale*0.5; if(i)ictx.lineTo(cx+x,cy+y);else ictx.moveTo(cx+x,cy+y);}ictx.stroke();
+    const sp=solarState(T), sx=cx+Math.cos(sp.az)*scale, sy=cy+(sp.z/1000)*state.zScale*scale*.5;
+    ictx.fillStyle='#ffd84a';ictx.shadowBlur=18;ictx.shadowColor='#ffd84a';ictx.beginPath();ictx.arc(sx,sy,5,0,TAU);ictx.fill();ictx.shadowBlur=0;
+    for(let j=0;j<planetData.length;j++){
+      const p=planetLocal(j,T,true); const px=sx+p[0]*scale*2.0, py=sy+p[1]*scale*2.0; ictx.fillStyle=planetData[j][5];ictx.beginPath();ictx.arc(px,py,2.0+(j>4),0,TAU);ictx.fill();
+    }
+    ictx.fillStyle='#9db0c5';ictx.font='8px ui-monospace,monospace';ictx.fillText('Absolute path = Galactic Sun carrier + heliocentric planet vector',10,h-22);ictx.fillText('Physical mode couples both to one shared time variable',10,h-10);
+  }
+  function drawCorkscrewInset(w,h,T){
+    const cx=w*.5,cy=h*.56, scale=Math.min(w,h)*.22;
+    const yearsSpan=state.corkscrewTrailMyr, samples=600;
+    ictx.strokeStyle='rgba(110,204,255,.55)';ictx.lineWidth=1.25;ictx.beginPath();
+    for(let i=0;i<=samples;i++){const t=T-yearsSpan*i/samples,s=solarState(t),x=Math.cos(s.az)*scale,y=(s.z/1000)*state.zScale*scale*.75;i?ictx.lineTo(cx+x,cy+y):ictx.moveTo(cx+x,cy+y);}ictx.stroke();
+    ictx.fillStyle='#ffd84a';ictx.beginPath();const s=solarState(T);ictx.arc(cx+Math.cos(s.az)*scale,cy+(s.z/1000)*state.zScale*scale*.75,5,0,TAU);ictx.fill();
+    const isFour=state.vm==='fourwave';ictx.fillStyle='#cbd8e8';ictx.font='8px ui-monospace,monospace';ictx.fillText(isFour?'4 vertical waves per 230 Myr • teaching construction':'Research mode • vertical oscillation period ≈ 87.8 Myr',10,h-22);ictx.fillText('Corkscrew appearance = orbital motion + vertical oscillation',10,h-10);
+  }
+  function drawSpinInset(w,h,T){
+    const cx=w*.5,cy=h*.56,r=Math.min(w,h)*.30;ictx.strokeStyle='rgba(199,156,255,.75)';ictx.lineWidth=2.0;ictx.beginPath();
+    for(let i=0;i<=220;i++){const a=TAU*i/220,x=cx+r*Math.cos(a),y=cy+r*Math.sin(a)*Math.cos(SOLAR_SPIN_TILT);i?ictx.lineTo(x,y):ictx.moveTo(x,y);}ictx.stroke();
+    const days=(state.motion==='physical')?T*1000000*365.256:sunSpinDays,ang=TAU*(days/SOLAR_SPIN_EQUATOR_D)*state.sunSpin;ictx.fillStyle='#c79cff';ictx.shadowBlur=16;ictx.shadowColor='#c79cff';ictx.beginPath();ictx.arc(cx+r*Math.cos(ang),cy+r*Math.sin(ang)*Math.cos(SOLAR_SPIN_TILT),4.5,0,TAU);ictx.fill();ictx.shadowBlur=0;ictx.fillStyle='#d8c9ef';ictx.font='8px ui-monospace,monospace';ictx.fillText('PURPLE = axial solar rotation • ≈25 d equator / ≈36 d poles',10,h-10);
+  }
+  function drawVelocityInset(w,h){
+    const mid=h*.57,pad=18;ictx.strokeStyle='rgba(255,255,255,.14)';ictx.lineWidth=1;ictx.beginPath();ictx.moveTo(pad,mid);ictx.lineTo(w-pad,mid);ictx.moveTo(w*.5,28);ictx.lineTo(w*.5,h-18);ictx.stroke();ictx.strokeStyle='#6dc9ff';ictx.lineWidth=2.2;ictx.beginPath();
+    for(let i=0;i<=360;i++){const x=i/360*2-1,a=Math.abs(x),inner=.60*Math.min(1,a/.28),outer=.60+.40*(1-Math.exp(-5*Math.max(0,a-.28))),v=a<.28?inner:outer,yy=(x<0?-1:1)*v,sx=pad+(x+1)/2*(w-2*pad),sy=mid-yy*(h*.34);i?ictx.lineTo(sx,sy):ictx.moveTo(sx,sy);}ictx.stroke();ictx.fillStyle='#9fb1c7';ictx.font='8px ui-monospace,monospace';ictx.fillText('approaching • blueshift',7,mid-48);ictx.fillText('receding • redshift',w-104,mid+34);ictx.fillText('illustrative projected LOS rotation diagnostic',8,h-10);
+  }
+  function drawInset(T){
+    const w=inset.clientWidth,h=inset.clientHeight;ictx.clearRect(0,0,w,h);bgInset(w,h);
+    if(state.tab==='velocity'){drawVelocityInset(w,h);return}
+    if(state.tab==='absolute'){drawAbsoluteInset(w,h,T);return}
+    if(state.tab==='corkscrew'){drawCorkscrewInset(w,h,T);return}
+    if(state.tab==='spin'){drawSpinInset(w,h,T);return}
+    drawPlanetInset(w,h,T);
+  }
+
+  // ---------- controls ----------
+  function bindRange(id,key,label,suffix='×'){document.getElementById(id).oninput=e=>{state[key]=+e.target.value;document.getElementById(label).textContent=state[key].toFixed(2)+suffix};}
+  bindRange('galaxySpeed','gal','galV'); bindRange('warpAmp','warp','warpV'); bindRange('warpSpeed','pre','preV'); bindRange('solarSpeed','solar','solarV'); bindRange('planetSpeed','planet','planetV'); bindRange('sunSpinSpeed','sunSpin','spinV'); bindRange('barSpeed','barSpeed','barV'); bindRange('swarmSpeed','swarmSpeed','swarmV');
+  document.getElementById('zScale').oninput=e=>{state.zScale=+e.target.value;document.getElementById('zV').textContent=state.zScale.toFixed(1)+'×'};
+  document.getElementById('planetScale').oninput=e=>{state.planetScale=+e.target.value;document.getElementById('psV').textContent=state.planetScale.toFixed(2)+'×'};
+  document.getElementById('planetSize').oninput=e=>{state.planetSize=+e.target.value;document.getElementById('planetSizeV').textContent=state.planetSize.toFixed(1)+'×'};
+  document.getElementById('sunSize').oninput=e=>{state.sunSize=+e.target.value;document.getElementById('sunSizeV').textContent=state.sunSize.toFixed(1)+'×'};
+  document.getElementById('fourAmp').oninput=e=>{state.fourAmp=+e.target.value;document.getElementById('fourAmpV').textContent=state.fourAmp.toFixed(2)+'×'};
+  document.getElementById('teachTime').oninput=e=>{state.teachYearsPerMyr=+e.target.value;document.getElementById('teachTimeV').textContent=state.teachYearsPerMyr.toFixed(1)+' yr/Myr'};
+  document.getElementById('corkSpan').oninput=e=>{state.corkscrewTrailMyr=+e.target.value;document.getElementById('corkSpanV').textContent=state.corkscrewTrailMyr.toFixed(0)+' Myr'};
+  document.getElementById('verticalModel').onchange=e=>{state.vm=e.target.value;document.getElementById('vmV').textContent=state.vm==='research'?'87.8 Myr':state.vm==='fourwave'?'57.5 Myr':'60 Myr';updateModeStrip()};
+  document.getElementById('motionMode').onchange=e=>{state.motion=e.target.value;document.getElementById('coupleV').textContent=state.motion==='physical'?'PHYSICAL':'TEACHING';updateModeStrip()};
+  [['warpOn','warpOn'],['sunTrail','sunTrail'],['planeOn','planeOn'],['barOn','barOn'],['solarVector','solarVector'],['nodesOn','nodesOn'],['haloOn','haloOn'],['planetOrbitOn','planetOrbitOn'],['planetTrailOn','planetTrailOn'],['absoluteOn','absoluteOn'],['spinOn','spinOn'],['frameOn','frameOn'],['planetOn','planetOn'],['autoCamera','autoCamera']].forEach(([id,key])=>document.getElementById(id).onchange=e=>{state[key]=e.target.checked;updateModeStrip()});
+  document.getElementById('nodeSize').oninput=e=>{state.nodeSize=+e.target.value;document.getElementById('nodeSizeV').textContent=state.nodeSize.toFixed(2)+'×'};
+  document.getElementById('nodeAlpha').oninput=e=>{state.nodeAlpha=+e.target.value;document.getElementById('nodeAlphaV').textContent=state.nodeAlpha.toFixed(2)+'×'};
+  document.getElementById('camSpeed').oninput=e=>{state.camSpeed=+e.target.value;document.getElementById('camSpeedV').textContent=state.camSpeed.toFixed(2)+'×'};
+  document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-view]').forEach(x=>x.classList.remove('active'));b.classList.add('active');viewPreset(b.dataset.view);updateModeStrip()});
+  document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-tab]').forEach(x=>x.classList.remove('active'));b.classList.add('active');state.tab=b.dataset.tab;updateModeStrip()});
+  document.getElementById('collapse').onclick=()=>{
+    const panel=document.getElementById('panel');
+    const rail=document.getElementById('controlsSection');
+    const collapsed=panel.classList.toggle('collapsed');
+    rail.classList.toggle('collapsedRail',collapsed);
+    const btn=document.getElementById('collapse');
+    btn.textContent=collapsed?'＋':'−';
+    btn.setAttribute('aria-label',collapsed?'Open control panel':'Minimize control panel');
+    btn.title=collapsed?'Open control panel':'Minimize control panel';
+  };
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){
+      const panel=document.getElementById('panel');
+      const btn=document.getElementById('collapse');
+      if(panel.classList.contains('collapsed')){
+        panel.classList.remove('collapsed'); document.getElementById('controlsSection').classList.remove('collapsedRail'); btn.textContent='−';
+        btn.setAttribute('aria-label','Minimize control grid'); btn.title='Minimize control grid';
+      }
+    }
+  });
+  document.getElementById('play').onclick=()=>{state.run=!state.run;const b=document.getElementById('play');b.textContent=state.run?'Pause':'Play';b.classList.toggle('active',state.run)};
+  document.getElementById('reset').onclick=()=>{T=0;planetClockYears=0;sunSpinDays=0;state.vm='research';state.motion='physical';state.fourAmp=1;state.teachYearsPerMyr=5;state.corkscrewTrailMyr=230;state.planetScale=1.35;state.planetSize=2.5;state.sunSize=2.5;viewPreset('full');distance=44;target=[0,0,0];yaw=28*DEG;pitch=24*DEG;state.run=true;state.autoCamera=false;document.getElementById('play').textContent='Pause';document.getElementById('autoCamera').checked=false;document.getElementById('verticalModel').value='research';document.getElementById('motionMode').value='physical';document.getElementById('vmV').textContent='87.8 Myr';document.getElementById('coupleV').textContent='PHYSICAL';document.getElementById('planetScale').value=1.35;document.getElementById('planetSize').value=2.5;document.getElementById('sunSize').value=2.5;document.getElementById('psV').textContent='1.35×';document.getElementById('planetSizeV').textContent='2.5×';document.getElementById('sunSizeV').textContent='2.5×';showToast('Full physical reset');updateModeStrip()};
+  document.getElementById('fit').onclick=()=>{viewPreset('full');distance=44;target=[0,0,0]};
+  document.getElementById('center').onclick=()=>viewPreset('solar');
+  document.getElementById('focusCore').onclick=()=>{yaw=28*DEG;pitch=30*DEG;distance=12;target=[0,0,0];showToast('Galactic core focus')};
+  document.getElementById('focusCorkscrew').onclick=()=>viewPreset('corkscrew');
+  document.getElementById('focusSun').onclick=()=>viewPreset('spin');
+  document.getElementById('toggleInset').onclick=()=>{const el=document.getElementById('inset');el.style.display=el.style.display==='none'?'block':'none'};
+  document.getElementById('savePNG').onclick=()=>{try{const a=document.createElement('a');a.download='milky-way-unified-factual-3d.png';a.href=glCanvas.toDataURL('image/png');a.click();showToast('PNG captured')}catch(err){showToast('PNG capture unavailable')}};
+  document.getElementById('demo').onclick=()=>{state.autoCamera=true;document.getElementById('autoCamera').checked=true;viewPreset('corkscrew');state.tab='corkscrew';document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x.dataset.tab==='corkscrew'));showToast('Corkscrew teaching demo');updateModeStrip()};
+  let toastTimer=0; function showToast(msg){const el=document.getElementById('toast');el.textContent=msg;el.style.opacity='1';clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.style.opacity='0',1300)}
+
+  // ---------- mouse ----------
+  let dragging=false,panning=false,lastX=0,lastY=0;
+  glCanvas.addEventListener('contextmenu',e=>e.preventDefault());
+  glCanvas.addEventListener('pointerdown',e=>{dragging=true;panning=e.shiftKey||e.button===2;lastX=e.clientX;lastY=e.clientY;glCanvas.setPointerCapture(e.pointerId)});
+  glCanvas.addEventListener('pointermove',e=>{
+    if(!dragging)return;
+    const dx=e.clientX-lastX,dy=e.clientY-lastY;lastX=e.clientX;lastY=e.clientY;
+    if(panning){target[0]-=dx*0.008*(distance/15);target[1]+=dy*0.008*(distance/15)}
+    else{yaw+=dx*0.008;pitch+=dy*0.008;pitch=Math.max(-1.50,Math.min(1.50,pitch))}
+  });
+  glCanvas.addEventListener('pointerup',()=>dragging=false);
+  glCanvas.addEventListener('wheel',e=>{e.preventDefault();distance*=Math.exp(e.deltaY*.00125);distance=Math.max(5.5,Math.min(80,distance))},{passive:false});
+
+  // ---------- HUD ----------
+  let T=0,planetClockYears=0,sunSpinDays=0,last=performance.now();
+  function updateModeStrip(){
+    const viewNames={full:'FULL GALAXY',face:'FACE-ON',oblique:'OBLIQUE',edge:'EDGE-ON',under:'UNDER',solar:'SOLAR FOCUS',corkscrew:'ABSOLUTE CORKSCREW',system:'SOLAR SYSTEM',spin:'SUN SPIN',warp:'WARP PROFILE',vel:'VELOCITY VIEW',full2:'RESET ANGLE'};
+    document.getElementById('modeStripView').textContent=viewNames[state.view]||'3D VIEW';
+    document.getElementById('modeStripVertical').textContent=state.vm==='fourwave'?'4-WAVE TEACHING':state.vm==='research'?'RESEARCH HARMONIC':'ILLUSTRATIVE';
+    document.getElementById('modeStripPlanets').textContent=state.planetOn?'8 PLANETS':'PLANETS OFF';
+    document.getElementById('modeStripCarrier').textContent=state.absoluteOn?'SUN + PLANETS CARRIED TOGETHER':'ABSOLUTE PATHS OFF';
+  }
+
+  function updateStats(){
+    const sst=solarState(T),cycles=PPHI/sst.Pz;
+    document.getElementById('stats').innerHTML=
+      `<span class="gold">SUN</span> • R₀ ${R0.toFixed(2)} kpc • z ${sst.z.toFixed(1)} pc<br>`+
+      `<span class="cyan">Galactic orbit</span> • ≈${PPHI.toFixed(0)} Myr • planets carried with Sun<br>`+
+      `<span class="mint">Vertical</span> • ${sst.Pz.toFixed(1)} Myr • ${cycles.toFixed(2)} cycles/orbit • ${getVerticalModel().label}<br>`+
+      `<span class="purple">Solar spin</span> • ≈25 d equator / ≈36 d poles • purple guide<br>`+
+      `<span class="cyan">Warp</span> • schematic outer-disc precession ≈600–700 Myr<br>`+
+      `<span class="pink">Mode</span> • ${state.motion==='physical'?'shared physical time':'accelerated teaching time'} • ${state.vm==='fourwave'?'4-wave teaching':'research harmonic'}<br>`+
+      `<span class="purple">Carrier</span> • Sun + planets follow the same Galactic 3D carrier • nodes ${state.nodesOn?'ON':'OFF'} • absolute paths ${state.absoluteOn?'ON':'OFF'}`;
+  }
+  function animate(now){
+    const dt=Math.min(.05,(now-last)/1000);last=now;
+    if(state.run){
+      T+=dt*PPHI*0.006*state.solar;
+      planetClockYears += dt*0.25*state.planet;
+      sunSpinDays += dt*30*state.sunSpin;
+    }
+    if(state.autoCamera) yaw += dt*0.12*state.camSpeed;
+    updateGalaxyPositions(T);
+    drawGalaxy(T);
+    drawInset(T);
+    updateModeStrip();
+    updateStats();
+    document.getElementById('loading').style.display='none';
+    requestAnimationFrame(animate);
+  }
+
+  try{
+    viewPreset('corkscrew');
+    state.tab='corkscrew';
+    document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x.dataset.tab==='corkscrew'));
+    updateModeStrip();
+    updateGalaxyPositions(0);
+    requestAnimationFrame(animate);
+  }catch(err){
+    document.getElementById('loading').style.display='flex';
+    document.getElementById('loading').textContent='3D initialization error: '+err.message;
+  }
+})();
+</script>
+</body>
+</html>
