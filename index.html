@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Milky Way — Unified Factual 3D Corkscrew • Local Dynamics • Fixed Dynamic Control Grid</title>
+<title>Milky Way — Unified Factual 3D Corkscrew • Responsive Fixed Control Center v24</title>
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;color:#eef5ff;font-family:Inter,Segoe UI,system-ui,sans-serif}
@@ -41,6 +41,25 @@ button.warn{border-color:rgba(255,190,90,.34)}
 .badgeOn{color:#77e3b8}.badgeOff{color:#ffadad}
 #toast{position:absolute;left:50%;top:18px;transform:translateX(-50%);z-index:40;opacity:0;pointer-events:none;background:rgba(8,16,27,.94);border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:7px 10px;font:9px ui-monospace,monospace;color:#dce9f8;transition:opacity .18s ease}
 #modeStrip{position:absolute;left:50%;top:48px;transform:translateX(-50%);z-index:14;display:flex;align-items:center;gap:7px;padding:6px 10px;border:1px solid rgba(198,156,255,.2);border-radius:999px;background:rgba(9,6,18,.68);backdrop-filter:blur(9px);font:700 8px ui-monospace,monospace;color:#d7c1f3;letter-spacing:.25px;white-space:nowrap;box-shadow:0 10px 30px rgba(0,0,0,.28)}#modeStripView{color:#d6adff}#modeStripVertical{color:#8fe5c7}#modeStripPlanets{color:#ffd67b}#modeStripCarrier{color:#b9d8ff}
+/* ---------- FIXED TEXTBOOK-STYLE GALAXY LABELS ---------- */
+#fixedGalaxyLabels{position:absolute;inset:0;z-index:16;pointer-events:none;overflow:hidden}
+#fixedGalaxyLabels .labelTitle{fill:#fff;paint-order:stroke;stroke:rgba(0,0,0,.88);stroke-width:7px;stroke-linejoin:round;font:900 26px Georgia,"Times New Roman",serif}
+#fixedGalaxyLabels .label{fill:#f7f4ff;paint-order:stroke;stroke:rgba(0,0,0,.92);stroke-width:4px;stroke-linejoin:round;font:800 14px Georgia,"Times New Roman",serif}
+#fixedGalaxyLabels .sub{fill:#f7f4ff;paint-order:stroke;stroke:rgba(0,0,0,.92);stroke-width:3.5px;font:700 12px Georgia,"Times New Roman",serif}
+#fixedGalaxyLabels .leader{stroke:rgba(255,255,255,.92);stroke-width:1.6;vector-effect:non-scaling-stroke;filter:drop-shadow(0 1px 2px rgba(0,0,0,.9))}
+#fixedGalaxyLabels .dot{fill:#fff;stroke:rgba(0,0,0,.86);stroke-width:1.2}
+#fixedGalaxyLabels .solarDot{fill:#ffd65a;stroke:#281c00;stroke-width:1.5}
+#fixedGalaxyLabels .labelBox{fill:rgba(2,5,12,.50);stroke:rgba(255,255,255,.10);stroke-width:1;rx:8}
+#fixedGalaxyLabels .key{font:800 8px ui-monospace,SFMono-Regular,Consolas,monospace;fill:#d8c8ee;letter-spacing:.3px}
+#fixedGalaxyLabels.hidden{display:none} #fixedGalaxyLabels .screenFixed{vector-effect:non-scaling-stroke}
+.annotationToggle{display:flex;align-items:center;gap:8px;margin-top:7px;padding:7px 9px;border:1px solid rgba(206,170,255,.10);border-radius:9px;background:rgba(12,9,22,.35);font-size:9px;color:#d8cdea}
+.annotationToggle input{accent-color:#b77aff}
+.referenceLabels{position:absolute;left:14px;right:14px;bottom:38px;z-index:16;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;pointer-events:none}
+.referenceLabels .ref{min-width:0;padding:7px 8px;border:1px solid rgba(202,157,255,.18);border-radius:9px;background:rgba(3,5,12,.58);backdrop-filter:blur(6px);text-align:center;box-shadow:0 5px 18px rgba(0,0,0,.20)}
+.referenceLabels .ref b{display:block;color:#f4eaff;font:900 9px/1.2 Georgia,"Times New Roman",serif}
+.referenceLabels .ref span{display:block;margin-top:2px;color:#c5b7d3;font-size:7.5px;line-height:1.2}
+@media(max-width:900px){#fixedGalaxyLabels .labelTitle{font-size:21px}#fixedGalaxyLabels .label{font-size:12px}#fixedGalaxyLabels .sub{font-size:10px}.referenceLabels{left:10px;right:10px;bottom:34px}.referenceLabels .ref b{font-size:8px}.referenceLabels .ref span{font-size:6.8px}}
+@media(max-width:620px){#fixedGalaxyLabels .labelTitle{font-size:16px}#fixedGalaxyLabels .label{font-size:9px;stroke-width:3px}#fixedGalaxyLabels .sub{font-size:7.5px;stroke-width:2.5px}.referenceLabels{grid-template-columns:1fr;gap:4px;bottom:34px}.referenceLabels .ref{padding:5px}.referenceLabels .ref span{font-size:6.5px}.annotationToggle{font-size:8.5px}}
 #loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:50;background:#000;color:#b9d9ff;font:12px ui-monospace,monospace;letter-spacing:.5px}
 @media(max-width:1100px){.panel{width:min(500px,calc(100vw - 24px))}.controlGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.viewsSec .grid3{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:820px){.panel{width:min(460px,calc(100vw - 20px));left:10px;top:10px;max-height:calc(100vh - 20px)}#stats{display:none}#inset{width:min(430px,calc(100vw - 20px));height:315px;right:10px;bottom:10px}.viewsSec .grid3{grid-template-columns:repeat(3,minmax(0,1fr))}.tabs{grid-template-columns:repeat(5,minmax(0,1fr))}}
@@ -97,6 +116,9 @@ body{margin:0}
 .controlsSection .panel.collapsed .body{display:none}
 .controlsSection .panel.collapsed #collapse{width:44px;height:44px;min-height:44px;padding:0;border-radius:12px;font-size:17px;display:flex;align-items:center;justify-content:center}
 .controlsSection.collapsedRail{width:58px}
+#app.railCollapsed .pageMain{padding-right:calc(58px + var(--side-gap))}
+#app.railCollapsed .visualSection,#app.railCollapsed .magnifiedSection{width:calc(100% - 28px)}
+#app.railCollapsed .controlsSection{width:58px}
 
 /* Keep the magnified analysis directly in the main reading column. */
 .magnifiedSection #inset{width:100%;}
@@ -129,7 +151,1072 @@ body{margin:0}
   .controlsSection .actionbar{grid-template-columns:1fr 1fr}
   .controlsSection.collapsedRail{left:auto;right:8px;width:58px}
 }
+
+@media(max-width:620px){.visualSection #stats{display:none}.visualSection #help{left:8px;right:8px;bottom:8px;max-width:72%;font-size:7.3px}.visualSection #caption{display:none}}
 </style>
+
+<style id="final-v20-layout">
+/* FINAL v20 — non-overlapping fixed side Control Center + scrolling main column */
+:root{
+  --header-h:88px;
+  --rail-w:420px;
+  --rail-collapsed:58px;
+  --rail-gap:16px;
+  --content-pad:14px;
+  --visual-h:clamp(460px,calc(100vh - var(--header-h) - 100px),760px);
+}
+html,body{width:100%;min-height:100%;height:auto;overflow:auto;overflow-x:hidden;background:#000}
+body{min-height:100vh}
+#app{position:relative;inset:auto;min-height:100vh;width:100%;overflow:visible}
+.siteHeader{position:sticky!important;top:0!important;z-index:200!important;width:100%;}
+.headerInner{width:min(1400px,calc(100% - 28px));margin:0 auto;}
+.pageMain{
+  width:100%;
+  padding-right:calc(var(--rail-w) + var(--rail-gap));
+  transition:padding-right .22s ease;
+  min-height:calc(100vh - var(--header-h));
+}
+/* Main reading column: visual first, unified local dynamics directly below it. */
+.visualSection{
+  position:relative!important;
+  width:calc(100% - 28px)!important;
+  max-width:none!important;
+  height:var(--visual-h)!important;
+  min-height:460px!important;
+  margin:14px 14px 0!important;
+  overflow:hidden!important;
+  border-radius:16px;
+  border:1px solid rgba(206,170,255,.18);
+  background:#000;
+}
+.visualSection canvas#gl{position:absolute!important;inset:0!important;width:100%!important;height:100%!important}
+#fixedGalaxyLabels{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;z-index:16!important;overflow:hidden!important;pointer-events:none!important}
+#stats{z-index:18!important;max-width:min(360px,42%)!important}
+#help{z-index:18!important;max-width:min(520px,58%)!important}
+#caption{z-index:18!important;max-width:min(760px,78%)!important}
+.magnifiedSection{
+  position:relative!important;
+  width:calc(100% - 28px)!important;
+  max-width:none!important;
+  margin:16px 14px 40px!important;
+  z-index:4!important;
+}
+.magnifiedSection .sectionHeading{position:relative!important;z-index:5;padding:0 4px 8px!important}
+.magnifiedSection #inset{
+  position:relative!important;
+  inset:auto!important;
+  width:100%!important;
+  height:clamp(380px,58vh,560px)!important;
+  max-height:none!important;
+  margin:0!important;
+  z-index:4!important;
+  overflow:hidden!important;
+}
+.magnifiedSection #insetCanvas{position:absolute!important;inset:0!important;width:100%!important;height:100%!important}
+.magnifiedSection .tabs{position:absolute!important;top:48px!important;left:10px!important;right:10px!important;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:7px!important;z-index:10!important}
+/* Side Control Center is fixed to the viewport, never part of the reading flow. */
+.controlsSection{
+  position:fixed!important;
+  right:12px!important;
+  top:calc(var(--header-h) + 12px)!important;
+  bottom:12px!important;
+  width:var(--rail-w)!important;
+  margin:0!important;
+  z-index:150!important;
+  pointer-events:none!important;
+  transition:width .22s ease,transform .22s ease;
+}
+.controlsSection .panel{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  max-height:none!important;
+  overflow:auto!important;
+  margin:0!important;
+  pointer-events:auto!important;
+  border-radius:18px!important;
+}
+.controlsSection .panel .head{
+  position:sticky!important;
+  top:0!important;
+  z-index:20!important;
+}
+.controlsSection .panel .body{padding-bottom:20px!important}
+.controlsSection .controlGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.controlsSection .visibilitySec .controlGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.controlsSection .viewsSec .grid3{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.controlsSection .panel.collapsed{
+  width:var(--rail-collapsed)!important;
+  height:var(--rail-collapsed)!important;
+  min-height:var(--rail-collapsed)!important;
+  inset:auto 0 auto auto!important;
+  overflow:hidden!important;
+  padding:7px!important;
+  border-radius:15px!important;
+  margin:0!important;
+}
+.controlsSection .panel.collapsed .head{display:flex!important;position:relative!important;inset:auto!important;height:44px!important;padding:0!important;background:transparent!important;border:0!important;justify-content:center!important;align-items:center!important}
+.controlsSection .panel.collapsed .head b,.controlsSection .panel.collapsed .tag,.controlsSection .panel.collapsed .body{display:none!important}
+.controlsSection .panel.collapsed #collapse{width:44px!important;height:44px!important;min-height:44px!important;padding:0!important;font-size:0!important;display:flex!important;align-items:center!important;justify-content:center!important;border-radius:12px!important}
+.controlsSection .panel.collapsed #collapse::before{content:'☰';font-size:18px;line-height:1;color:#f4eaff}
+#app.railCollapsed{--rail-w:var(--rail-collapsed)}
+#app.railCollapsed .pageMain{padding-right:calc(var(--rail-collapsed) + var(--rail-gap))!important}
+#app.railCollapsed .controlsSection{width:var(--rail-collapsed)!important}
+#app.railCollapsed .controlsSection .panel{width:var(--rail-collapsed)!important;height:var(--rail-collapsed)!important;overflow:hidden!important}
+/* Prevent any section or child from producing horizontal overflow. */
+.pageMain,.visualSection,.magnifiedSection,.controlsSection,.controlsSection .panel,.controlsSection .body,.controlsSection .controlGrid{min-width:0;max-width:100%}
+
+@media (min-width:1500px){
+  :root{--rail-w:450px;--rail-gap:18px;--visual-h:clamp(520px,calc(100vh - var(--header-h) - 80px),800px)}
+}
+@media (max-width:1200px) and (min-width:901px){
+  :root{--rail-w:360px;--rail-gap:12px}
+  .controlsSection .controlGrid,.controlsSection .visibilitySec .controlGrid{grid-template-columns:1fr!important}
+  .controlsSection .viewsSec .grid3{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
+@media (max-width:900px){
+  :root{--rail-w:min(320px,42vw);--rail-gap:10px;--content-pad:10px;--visual-h:clamp(430px,60vh,650px)}
+  .headerInner{width:calc(100% - 20px)}
+  .controlsSection{right:8px!important;top:calc(var(--header-h) + 8px)!important;bottom:8px!important}
+  .pageMain{padding-right:calc(var(--rail-w) + var(--rail-gap))}
+  .visualSection,.magnifiedSection{width:calc(100% - 20px)!important;margin-left:10px!important;margin-right:10px!important}
+  .controlsSection .viewsSec .grid3{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .controlsSection .controlGrid,.controlsSection .visibilitySec .controlGrid{grid-template-columns:1fr!important}
+}
+@media (max-width:700px){
+  :root{--rail-w:min(285px,43vw);--rail-gap:9px;--visual-h:clamp(410px,56vh,590px)}
+  .headerInner .headerSub{max-width:68%}
+  .visualSection,.magnifiedSection{width:calc(100% - 16px)!important;margin-left:8px!important;margin-right:8px!important}
+  .controlsSection{right:6px!important;top:calc(var(--header-h) + 6px)!important;bottom:6px!important}
+  .controlsSection .panel{border-radius:15px!important}
+  .controlsSection .controlGrid,.controlsSection .visibilitySec .controlGrid,.controlsSection .grid2{grid-template-columns:1fr!important}
+  .controlsSection .actionbar{grid-template-columns:1fr!important}
+  .magnifiedSection #inset{height:clamp(360px,52vh,500px)!important}
+  .magnifiedSection .tabs{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #stats{display:none!important}
+}
+@media (max-width:460px){
+  :root{--rail-w:min(250px,44vw);--visual-h:410px}
+  .brandBlock h1{font-size:18px}
+  .headerInner .eyebrow{font-size:8px}
+  .headerInner .headerSub{font-size:8px;max-width:64%}
+  .controlsSection .panel{padding:10px!important}
+  .controlsSection .controlTitle{font-size:8px}
+  .controlsSection .row label{font-size:9px}
+  .visualSection{min-height:390px!important}
+}
+</style>
+
+
+<style id="final-v21-no-overlap">
+/* FINAL v21 — hard right dock: main content width is explicitly reduced, never covered by the control rail. */
+:root{
+  --header-h:88px;
+  --rail-w:420px;
+  --rail-collapsed:58px;
+  --rail-gap:16px;
+  --edge-gap:14px;
+}
+html,body{width:100%;min-width:0;overflow-x:hidden;overflow-y:auto}
+#app{width:100%;min-width:0;overflow:visible}
+.siteHeader{position:sticky!important;top:0!important;z-index:300!important;width:100%!important}
+
+/* The main reading column is a real sibling column of the fixed rail.
+   This is deliberately width-based instead of padding-based so minimized/open states cannot overlap. */
+.pageMain{
+  position:relative!important;
+  width:calc(100% - var(--rail-w) - var(--rail-gap))!important;
+  max-width:none!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:0!important;
+  box-sizing:border-box!important;
+  transition:width .22s ease!important;
+}
+
+.visualSection,
+.magnifiedSection{
+  width:calc(100% - (2 * var(--edge-gap)))!important;
+  max-width:none!important;
+  margin-left:var(--edge-gap)!important;
+  margin-right:var(--edge-gap)!important;
+  box-sizing:border-box!important;
+}
+
+.visualSection{position:relative!important;z-index:5!important}
+.magnifiedSection{position:relative!important;z-index:5!important}
+
+/* The control rail is always physically attached to the right viewport edge. */
+.controlsSection{
+  position:fixed!important;
+  left:auto!important;
+  right:var(--edge-gap)!important;
+  top:calc(var(--header-h) + var(--edge-gap))!important;
+  bottom:var(--edge-gap)!important;
+  width:var(--rail-w)!important;
+  margin:0!important;
+  z-index:500!important;
+  pointer-events:none!important;
+}
+.controlsSection .panel{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:none!important;
+  max-height:none!important;
+  margin:0!important;
+  box-sizing:border-box!important;
+  pointer-events:auto!important;
+}
+
+/* Minimized rail stays on the same right edge and occupies only its own 58px strip. */
+.controlsSection.collapsedRail,
+#app.railCollapsed .controlsSection{
+  width:var(--rail-collapsed)!important;
+  left:auto!important;
+  right:var(--edge-gap)!important;
+}
+#app.railCollapsed .pageMain{
+  width:calc(100% - var(--rail-collapsed) - var(--rail-gap))!important;
+  padding:0!important;
+}
+#app.railCollapsed .controlsSection .panel,
+.controlsSection .panel.collapsed{
+  width:var(--rail-collapsed)!important;
+  height:var(--rail-collapsed)!important;
+  min-width:var(--rail-collapsed)!important;
+  min-height:var(--rail-collapsed)!important;
+  max-width:var(--rail-collapsed)!important;
+  max-height:var(--rail-collapsed)!important;
+  inset:0 0 auto auto!important;
+  margin:0!important;
+  overflow:hidden!important;
+}
+
+/* Never let a child section grow beyond the available main column. */
+.pageMain>*{max-width:100%!important;min-width:0!important}
+.visualSection canvas#gl{position:absolute!important;inset:0!important;width:100%!important;height:100%!important}
+#fixedGalaxyLabels{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;overflow:hidden!important}
+
+/* Keep the local magnified card directly beneath the visual in the same main column. */
+.magnifiedSection{margin-bottom:40px!important}
+
+/* Desktop / tablet: preserve the right rail and shrink/reflow its internal grid as needed. */
+@media (max-width:1200px) and (min-width:901px){
+  :root{--rail-w:360px;--rail-gap:12px;--edge-gap:12px}
+}
+@media (max-width:900px){
+  :root{--rail-w:min(320px,38vw);--rail-gap:10px;--edge-gap:8px;--header-h:82px}
+  .pageMain{width:calc(100% - var(--rail-w) - var(--rail-gap))!important}
+  .controlsSection{right:var(--edge-gap)!important}
+  .controlsSection .controlGrid,.controlsSection .visibilitySec .controlGrid{grid-template-columns:1fr!important}
+  .controlsSection .viewsSec .grid3{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media (max-width:700px){
+  :root{--rail-w:min(285px,39vw);--rail-gap:8px;--edge-gap:6px;--header-h:78px}
+  .pageMain{width:calc(100% - var(--rail-w) - var(--rail-gap))!important}
+  .visualSection,.magnifiedSection{width:calc(100% - (2 * var(--edge-gap)))!important;margin-left:var(--edge-gap)!important;margin-right:var(--edge-gap)!important}
+  .controlsSection .panel{border-radius:14px!important}
+}
+@media (max-width:460px){
+  :root{--rail-w:44vw;--rail-gap:6px;--edge-gap:5px;--header-h:74px}
+  .controlsSection .controlGrid,.controlsSection .visibilitySec .controlGrid{grid-template-columns:1fr!important}
+  .controlsSection .viewsSec .grid3{grid-template-columns:1fr 1fr!important}
+}
+</style>
+
+
+<style id="final-v22-responsive-fixed-layout">
+/* FINAL v22 — true fixed right Control Center + scrolling main scene + two-row visual footer.
+   The rail remains fixed to the viewport while the visual/local-dynamics column scrolls normally. */
+:root{
+  --header-h:88px;
+  --rail-w:420px;
+  --rail-gap:16px;
+  --edge-gap:14px;
+  --rail-pad:12px;
+}
+html,body{
+  width:100%;
+  min-width:0;
+  min-height:100%;
+  height:auto;
+  overflow-x:hidden;
+  overflow-y:auto;
+}
+#app{
+  position:relative!important;
+  inset:auto!important;
+  width:100%!important;
+  min-height:100vh!important;
+  overflow:visible!important;
+}
+.siteHeader{
+  position:sticky!important;
+  top:0!important;
+  left:0!important;
+  right:0!important;
+  width:100%!important;
+  z-index:3000!important;
+}
+.headerInner{
+  width:calc(100% - 28px)!important;
+  max-width:1500px!important;
+  margin:0 auto!important;
+}
+.pageMain{
+  position:relative!important;
+  width:calc(100% - var(--rail-w) - var(--rail-gap))!important;
+  max-width:none!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:0!important;
+  box-sizing:border-box!important;
+  transition:width .22s ease!important;
+}
+.visualSection,.magnifiedSection{
+  position:relative!important;
+  width:calc(100% - (2 * var(--edge-gap)))!important;
+  max-width:none!important;
+  min-width:0!important;
+  margin-left:var(--edge-gap)!important;
+  margin-right:var(--edge-gap)!important;
+  box-sizing:border-box!important;
+}
+.visualSection{
+  height:clamp(470px,calc(100vh - var(--header-h) - 88px),760px)!important;
+  min-height:440px!important;
+  overflow:hidden!important;
+  z-index:5!important;
+}
+.visualSection canvas#gl{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+}
+#fixedGalaxyLabels{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  overflow:hidden!important;
+  pointer-events:none!important;
+  z-index:16!important;
+}
+.magnifiedSection{
+  z-index:5!important;
+  margin-top:16px!important;
+  margin-bottom:40px!important;
+}
+.magnifiedSection #inset{
+  position:relative!important;
+  inset:auto!important;
+  width:100%!important;
+  height:clamp(390px,58vh,560px)!important;
+  margin:0!important;
+  overflow:hidden!important;
+}
+/* Fixed rail. Its panel is independently scrollable; page scrolling never moves it. */
+.controlsSection{
+  position:fixed!important;
+  left:auto!important;
+  right:var(--rail-gap)!important;
+  top:calc(var(--header-h) + var(--rail-pad))!important;
+  bottom:var(--rail-pad)!important;
+  width:var(--rail-w)!important;
+  margin:0!important;
+  z-index:5000!important;
+  pointer-events:none!important;
+}
+.controlsSection .panel{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:none!important;
+  max-height:none!important;
+  margin:0!important;
+  overflow:auto!important;
+  pointer-events:auto!important;
+  box-sizing:border-box!important;
+}
+.controlsSection .panel .head{
+  position:sticky!important;
+  top:0!important;
+  z-index:40!important;
+}
+.controlsSection .body{
+  padding-bottom:24px!important;
+}
+.controlsSection .controlGrid{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  align-items:stretch!important;
+}
+.controlsSection .visibilitySec .controlGrid{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+}
+.controlsSection .viewsSec .grid3{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+}
+/* Minimized state stays on the same fixed right edge and never changes sides. */
+.controlsSection.collapsedRail,
+#app.railCollapsed .controlsSection{
+  left:auto!important;
+  right:var(--rail-gap)!important;
+  width:58px!important;
+}
+.controlsSection.collapsedRail .panel,
+.controlsSection .panel.collapsed,
+#app.railCollapsed .controlsSection .panel{
+  width:58px!important;
+  height:58px!important;
+  min-width:58px!important;
+  min-height:58px!important;
+  max-width:58px!important;
+  max-height:58px!important;
+  inset:0 0 auto auto!important;
+  overflow:hidden!important;
+  padding:7px!important;
+}
+#app.railCollapsed .pageMain{
+  width:calc(100% - 58px - var(--rail-gap))!important;
+}
+/* Dynamic visual information footer: exactly two rows, no overlap. */
+.visualInfoBar{
+  position:absolute!important;
+  left:14px!important;
+  right:14px!important;
+  bottom:12px!important;
+  z-index:22!important;
+  display:grid!important;
+  grid-template-rows:auto auto!important;
+  gap:6px!important;
+  pointer-events:none!important;
+}
+.visualInfoRow{
+  min-width:0!important;
+  display:grid!important;
+  align-items:center!important;
+  gap:8px!important;
+}
+.visualInfoRowTop{
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+}
+.visualInfoRowBottom{
+  grid-template-columns:minmax(0,1fr)!important;
+}
+.visualInfoBar #help,
+.visualInfoHint,
+.visualInfoBar #caption{
+  position:static!important;
+  left:auto!important;
+  right:auto!important;
+  bottom:auto!important;
+  transform:none!important;
+  max-width:none!important;
+  min-width:0!important;
+  width:auto!important;
+  margin:0!important;
+  background:rgba(3,7,13,.78)!important;
+  border:1px solid rgba(206,170,255,.18)!important;
+  border-radius:9px!important;
+  color:#c7d2e0!important;
+  box-shadow:0 8px 24px rgba(0,0,0,.22)!important;
+}
+.visualInfoBar #help{
+  padding:7px 9px!important;
+  font-size:8.3px!important;
+  line-height:1.35!important;
+}
+.visualInfoHint{
+  padding:7px 9px!important;
+  font-size:8.3px!important;
+  line-height:1.35!important;
+  color:#bcaed0!important;
+}
+.visualInfoBar #caption{
+  padding:6px 9px!important;
+  font-size:8.2px!important;
+  line-height:1.32!important;
+  text-align:center!important;
+  color:#aebed0!important;
+}
+.visualInfoBar b{color:#eadcff!important}
+/* The fixed stats card stays within the visual, independent of the footer. */
+.visualSection #stats{
+  z-index:24!important;
+  right:14px!important;
+  top:14px!important;
+  max-width:min(350px,42%)!important;
+}
+/* Desktop/tablet breakpoints — right side remains right side. */
+@media (max-width:1200px){
+  :root{--rail-w:360px;--rail-gap:12px;--edge-gap:12px}
+}
+@media (max-width:980px){
+  :root{--rail-w:330px;--rail-gap:10px;--edge-gap:10px}
+  .controlsSection .controlGrid,.controlsSection .visibilitySec .controlGrid{grid-template-columns:1fr 1fr!important}
+  .controlsSection .viewsSec .grid3{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  .visualSection{height:clamp(440px,62vh,680px)!important}
+}
+@media (max-width:760px){
+  :root{--rail-w:min(300px,42vw);--rail-gap:8px;--edge-gap:8px}
+  .pageMain{width:calc(100% - var(--rail-w) - var(--rail-gap))!important}
+  .controlsSection{left:auto!important;right:var(--rail-gap)!important}
+  .controlsSection .controlGrid,.controlsSection .visibilitySec .controlGrid{grid-template-columns:1fr!important}
+  .controlsSection .viewsSec .grid3{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .visualInfoRowTop{grid-template-columns:1fr!important}
+  .visualInfoHint{display:none!important}
+  .visualInfoBar{left:8px!important;right:8px!important;bottom:8px!important}
+  .visualSection #stats{display:none!important}
+}
+@media (max-width:540px){
+  :root{--rail-w:min(270px,48vw);--rail-gap:6px;--edge-gap:6px}
+  .visualSection{height:clamp(400px,58vh,600px)!important;min-height:390px!important}
+  .controlsSection .panel{border-radius:14px!important}
+  .controlsSection .controlGrid,.controlsSection .visibilitySec .controlGrid,.controlsSection .grid2{grid-template-columns:1fr!important}
+  .controlsSection .viewsSec .grid3{grid-template-columns:1fr 1fr!important}
+}
+</style>
+
+
+<style id="final-v23-responsive-layout">
+/* FINAL v23 — true two-column responsive architecture
+   Column 1 = scrolling visual + local dynamics
+   Column 2 = fixed Control Center
+   Header = sticky/fixed-width responsive band
+   No overlap at any supported width. */
+:root{
+  --header-h:clamp(78px,7.2vw,96px);
+  --rail-w:clamp(330px,29vw,470px);
+  --rail-gap:clamp(10px,1.1vw,18px);
+  --edge-gap:clamp(8px,1vw,14px);
+  --page-side-pad:clamp(8px,1vw,14px);
+  --visual-min:430px;
+}
+html,body{width:100%;min-width:0;height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto}
+#app{position:relative!important;inset:auto!important;width:100%!important;min-height:100vh!important;overflow:visible!important}
+
+/* Responsive sticky heading — remains visible while the page scrolls. */
+.siteHeader{
+  position:sticky!important;top:0!important;left:0!important;right:0!important;
+  width:100%!important;z-index:4000!important;
+  backdrop-filter:blur(14px);
+}
+.headerInner{
+  width:min(1600px,calc(100% - (2 * var(--page-side-pad))))!important;
+  max-width:none!important;margin:0 auto!important;
+  min-width:0!important;
+}
+.brandBlock{min-width:0!important}
+.brandBlock h1{
+  font-size:clamp(18px,1.6vw,28px)!important;
+  line-height:1.12!important;
+  overflow-wrap:anywhere;
+}
+.headerSub,.eyebrow{
+  font-size:clamp(8px,.68vw,11px)!important;
+  line-height:1.35!important;
+}
+
+/* Main layout reserves the complete fixed rail. */
+.pageMain{
+  position:relative!important;
+  width:calc(100% - var(--rail-w) - var(--rail-gap))!important;
+  max-width:none!important;min-width:0!important;
+  margin:0!important;padding:0!important;
+  transition:width .24s ease!important;
+}
+
+.visualSection,.magnifiedSection{
+  width:calc(100% - (2 * var(--edge-gap)))!important;
+  max-width:none!important;min-width:0!important;
+  margin-left:var(--edge-gap)!important;margin-right:var(--edge-gap)!important;
+}
+.visualSection{
+  height:clamp(var(--visual-min),calc(100vh - var(--header-h) - 90px),800px)!important;
+  min-height:var(--visual-min)!important;
+  overflow:hidden!important;position:relative!important;
+}
+.visualSection canvas#gl{position:absolute!important;inset:0!important;width:100%!important;height:100%!important}
+#fixedGalaxyLabels{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;overflow:hidden!important;pointer-events:none!important;z-index:16!important}
+
+/* Local dynamics is always part of the scrolling first column. */
+.magnifiedSection{position:relative!important;z-index:10!important;margin-top:16px!important;margin-bottom:44px!important}
+.magnifiedSection #inset{
+  position:relative!important;inset:auto!important;width:100%!important;
+  height:clamp(380px,58vh,570px)!important;max-height:none!important;
+  margin:0!important;overflow:hidden!important;
+}
+.magnifiedSection #insetCanvas{position:absolute!important;inset:0!important;width:100%!important;height:100%!important}
+.magnifiedSection .tabs{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+
+/* Control Center — genuinely fixed on the right, never in document flow. */
+.controlsSection{
+  position:fixed!important;left:auto!important;right:var(--rail-gap)!important;
+  top:calc(var(--header-h) + var(--rail-gap))!important;
+  bottom:var(--rail-gap)!important;
+  width:var(--rail-w)!important;height:auto!important;
+  margin:0!important;z-index:5000!important;pointer-events:none!important;
+}
+.controlsSection .panel{
+  position:absolute!important;inset:0!important;width:100%!important;height:100%!important;
+  min-width:0!important;max-width:none!important;max-height:none!important;
+  margin:0!important;overflow:auto!important;pointer-events:auto!important;
+  container-type:inline-size;container-name:controlrail;
+}
+.controlsSection .panel .head{position:sticky!important;top:0!important;z-index:50!important}
+.controlsSection .body{padding-bottom:26px!important}
+
+/* Internal grids adapt to the actual side-rail width, not the browser width. */
+.controlsSection .controlGrid,
+.controlsSection .visibilitySec .controlGrid{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  align-items:stretch!important;gap:9px!important;
+}
+.controlsSection .viewsSec .grid3{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important}
+.controlsSection .actionbar{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important}
+.controlsSection .controlGrid .row{min-width:0!important}
+.controlsSection .row label{
+  font-size:clamp(8.5px,1.25cqw,11px)!important;
+  line-height:1.25!important;min-width:0!important;
+}
+.controlsSection .val{font-size:clamp(8.5px,1.2cqw,10.5px)!important}
+.controlsSection .controlTitle{font-size:clamp(8px,1.15cqw,10px)!important}
+.controlsSection .chk{font-size:clamp(8px,1.12cqw,10px)!important;line-height:1.25!important;min-width:0!important}
+.controlsSection button{font-size:clamp(8px,1.12cqw,10px)!important;line-height:1.15!important;min-width:0!important}
+.controlsSection input[type=range]{min-width:0!important}
+
+/* Minimized state — same right edge, narrower rail, main column expands. */
+#app.railCollapsed .pageMain{
+  width:calc(100% - var(--rail-collapsed) - var(--rail-gap))!important;
+}
+#app.railCollapsed .controlsSection,
+.controlsSection.collapsedRail{
+  left:auto!important;right:var(--rail-gap)!important;width:var(--rail-collapsed)!important;
+}
+#app.railCollapsed .controlsSection .panel,
+.controlsSection .panel.collapsed{
+  width:var(--rail-collapsed)!important;height:var(--rail-collapsed)!important;
+  min-width:var(--rail-collapsed)!important;min-height:var(--rail-collapsed)!important;
+  max-width:var(--rail-collapsed)!important;max-height:var(--rail-collapsed)!important;
+  inset:0 0 auto auto!important;overflow:hidden!important;padding:7px!important;
+}
+#app.railCollapsed .controlsSection .panel .head,
+.controlsSection .panel.collapsed .head{
+  position:relative!important;top:auto!important;height:44px!important;padding:0!important;
+  border:0!important;background:transparent!important;
+  display:flex!important;justify-content:center!important;align-items:center!important;
+}
+#app.railCollapsed .controlsSection .panel .head b,
+#app.railCollapsed .controlsSection .panel .tag,
+#app.railCollapsed .controlsSection .panel .body,
+.controlsSection .panel.collapsed .head b,
+.controlsSection .panel.collapsed .tag,
+.controlsSection .panel.collapsed .body{display:none!important}
+#app.railCollapsed .controlsSection #collapse,
+.controlsSection .panel.collapsed #collapse{
+  width:44px!important;height:44px!important;min-height:44px!important;padding:0!important;
+  font-size:0!important;display:flex!important;align-items:center!important;justify-content:center!important;
+  border-radius:12px!important;
+}
+
+/* Text remains readable. It becomes smaller only as the available rail/viewport becomes smaller,
+   but never collapses or overflows its card. */
+.controlGrid .row label span,.visibilitySec .chk,.viewsSec button,.actionbar button{
+  overflow-wrap:anywhere;word-break:normal;
+}
+
+/* Container-query tiers: the fixed rail changes its own internal density without moving sides. */
+@container controlrail (max-width:370px){
+  .controlsSection .controlGrid,.controlsSection .visibilitySec .controlGrid{grid-template-columns:1fr!important}
+  .controlsSection .viewsSec .grid3{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .controlsSection .actionbar{grid-template-columns:1fr 1fr!important}
+}
+@container controlrail (max-width:300px){
+  .controlsSection .viewsSec .grid3,.controlsSection .actionbar{grid-template-columns:1fr 1fr!important}
+}
+@container controlrail (max-width:250px){
+  .controlsSection .viewsSec .grid3,.controlsSection .actionbar{grid-template-columns:1fr!important}
+}
+
+/* Stable two-row information strip at the bottom of the visual. */
+.visualInfoBar{left:var(--edge-gap)!important;right:var(--edge-gap)!important;bottom:10px!important}
+.visualInfoRowTop{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important}
+.visualInfoBar #help,.visualInfoHint,.visualInfoBar #caption{
+  min-width:0!important;overflow-wrap:anywhere!important;
+}
+.visualInfoBar #help,.visualInfoHint,.visualInfoBar #caption{
+  font-size:clamp(7.5px,.62vw,9px)!important;
+}
+
+/* Large screens keep the rail substantial without making the visual narrow. */
+@media(min-width:1700px){
+  :root{--rail-w:470px;--rail-gap:18px;--edge-gap:14px}
+}
+@media(max-width:1200px) and (min-width:901px){
+  :root{--rail-w:360px;--rail-gap:12px;--edge-gap:10px}
+}
+@media(max-width:900px){
+  :root{--rail-w:320px;--rail-gap:10px;--edge-gap:8px;--header-h:82px}
+  .visualInfoRowTop{grid-template-columns:1fr!important}
+  .visualInfoHint{display:none!important}
+  .visualInfoBar{left:8px!important;right:8px!important;bottom:8px!important}
+  .visualSection{height:clamp(430px,60vh,650px)!important}
+}
+@media(max-width:700px){
+  :root{--rail-w:42vw;--rail-gap:8px;--edge-gap:7px;--header-h:78px}
+  .visualSection{height:clamp(410px,57vh,590px)!important;min-height:400px!important}
+  .magnifiedSection #inset{height:clamp(360px,54vh,500px)!important}
+  .brandBlock h1{font-size:clamp(17px,4.3vw,22px)!important}
+}
+@media(max-width:520px){
+  :root{--rail-w:44vw;--rail-gap:6px;--edge-gap:6px;--header-h:74px}
+  .visualSection{height:410px!important;min-height:390px!important}
+  .magnifiedSection #inset{height:400px!important}
+  .visualInfoBar #help,.visualInfoBar #caption{font-size:7.4px!important}
+}
+@media(max-width:360px){
+  :root{--rail-w:46vw;--rail-gap:5px;--edge-gap:5px;--header-h:72px}
+  .visualInfoBar #help,.visualInfoBar #caption{font-size:7px!important}
+}
+</style>
+
+
+<style id="final-v24-perfect-responsive-layout">
+/* FINAL v24 — clean responsive architecture, fixed right rail, independently scrolling controls,
+   stable typography, non-stretching SVG labels, no duplicate local heading. */
+:root{
+  --header-h:88px;
+  --rail-w:clamp(300px,30vw,470px);
+  --rail-gap:clamp(8px,1vw,16px);
+  --edge-gap:clamp(8px,1vw,14px);
+  --rail-pad:clamp(8px,1vw,12px);
+  --rail-collapsed:58px;
+}
+
+/* ---------- Page / fixed geometry ---------- */
+html,body{
+  width:100%; min-width:0; min-height:100%; height:auto;
+  overflow-x:hidden; overflow-y:auto;
+}
+#app{position:relative!important; inset:auto!important; width:100%!important; min-height:100vh!important; overflow:visible!important;}
+.siteHeader{
+  position:sticky!important; top:0!important; left:0!important; right:0!important;
+  width:100%!important; z-index:10000!important;
+}
+.headerInner{
+  width:calc(100% - 2*var(--edge-gap))!important;
+  max-width:1600px!important; margin:0 auto!important;
+  min-width:0!important;
+}
+.brandBlock{min-width:0!important; overflow:hidden!important;}
+.brandBlock h1{
+  margin:0!important;
+  font-size:clamp(17px,1.45vw,25px)!important;
+  line-height:1.12!important;
+  letter-spacing:-.1px!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  transform:none!important;
+}
+.headerSub{
+  font-size:clamp(8px,.62vw,10px)!important;
+  line-height:1.35!important;
+  white-space:normal!important;
+  overflow-wrap:normal!important;
+  word-break:normal!important;
+}
+#modeStrip{
+  min-width:0!important;
+  max-width:100%!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+
+/* ---------- Main first column ---------- */
+.pageMain{
+  position:relative!important;
+  width:calc(100% - var(--rail-w) - var(--rail-gap))!important;
+  max-width:none!important; min-width:0!important;
+  margin:0!important; padding:0!important;
+  transition:width .22s ease!important;
+}
+.visualSection,.magnifiedSection{
+  width:calc(100% - 2*var(--edge-gap))!important;
+  max-width:none!important; min-width:0!important;
+  margin-left:var(--edge-gap)!important; margin-right:var(--edge-gap)!important;
+  box-sizing:border-box!important;
+}
+.visualSection{
+  position:relative!important; z-index:5!important;
+  height:clamp(430px,calc(100vh - var(--header-h) - 80px),800px)!important;
+  min-height:430px!important;
+  overflow:hidden!important;
+}
+.visualSection canvas#gl{position:absolute!important; inset:0!important; width:100%!important; height:100%!important;}
+#fixedGalaxyLabels{
+  position:absolute!important; inset:0!important; width:100%!important; height:100%!important;
+  z-index:16!important; overflow:hidden!important; pointer-events:none!important;
+}
+/* SVG text keeps a uniform aspect ratio; dynamic anchors still follow the 3D projection. */
+#fixedGalaxyLabels .labelTitle{
+  font-size:20px!important;
+  letter-spacing:0!important;
+}
+#fixedGalaxyLabels .label,
+#fixedGalaxyLabels .sub{
+  letter-spacing:0!important;
+}
+
+/* ---------- Two-row footer inside the visual ---------- */
+.visualInfoBar{left:var(--edge-gap)!important; right:var(--edge-gap)!important; bottom:10px!important;}
+.visualInfoRowTop{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important; align-items:stretch!important;}
+.visualInfoBar #help,.visualInfoHint,.visualInfoBar #caption{
+  min-width:0!important; overflow:hidden!important;
+  overflow-wrap:normal!important; word-break:normal!important;
+}
+.visualInfoBar #help,.visualInfoHint,.visualInfoBar #caption{
+  font-size:clamp(7.2px,.60vw,9px)!important;
+}
+
+/* ---------- Unified Local Dynamics directly below visual ---------- */
+.magnifiedSection{
+  position:relative!important; z-index:5!important;
+  margin-top:16px!important; margin-bottom:44px!important;
+}
+.magnifiedSection .sectionHeading{
+  position:relative!important; z-index:6!important;
+  min-width:0!important;
+  display:flex!important; align-items:baseline!important; justify-content:space-between!important;
+  gap:12px!important; padding:0 3px 9px!important;
+}
+.magnifiedSection .sectionHeading>div{
+  white-space:nowrap!important; overflow:hidden!important; text-overflow:ellipsis!important;
+  flex:0 1 auto!important;
+}
+.magnifiedSection .sectionHeading>span{
+  white-space:nowrap!important; overflow:hidden!important; text-overflow:ellipsis!important;
+  flex:0 1 52%!important; min-width:0!important;
+}
+.magnifiedSection #inset{
+  position:relative!important; inset:auto!important; width:100%!important;
+  height:clamp(380px,56vh,560px)!important; margin:0!important;
+  overflow:hidden!important; z-index:4!important;
+}
+.magnifiedSection #insetCanvas{position:absolute!important; inset:0!important; width:100%!important; height:100%!important;}
+.magnifiedSection .ititle{display:none!important;}
+.magnifiedSection .isub{display:none!important;}
+.magnifiedSection .tabs{
+  top:10px!important; left:10px!important; right:10px!important;
+  display:grid!important; grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  gap:7px!important; z-index:10!important;
+}
+.magnifiedSection .tabs button{
+  min-width:0!important; min-height:38px!important;
+  white-space:nowrap!important; overflow:hidden!important; text-overflow:ellipsis!important;
+  font-size:clamp(8px,.65vw,10px)!important;
+}
+
+/* ---------- Fixed Control Center ---------- */
+.controlsSection{
+  position:fixed!important;
+  left:auto!important; right:var(--rail-gap)!important;
+  top:calc(var(--header-h) + var(--rail-pad))!important;
+  bottom:var(--rail-pad)!important;
+  width:var(--rail-w)!important; height:auto!important;
+  margin:0!important; z-index:9000!important;
+  pointer-events:none!important;
+}
+.controlsSection .panel{
+  position:absolute!important; inset:0!important;
+  width:100%!important; height:100%!important;
+  min-width:0!important; max-width:none!important;
+  min-height:0!important; max-height:none!important;
+  margin:0!important; padding:12px!important;
+  overflow:hidden!important;
+  display:flex!important; flex-direction:column!important;
+  pointer-events:auto!important;
+  box-sizing:border-box!important;
+}
+/* Header is outside the scrolling body, so it never collapses while controls scroll. */
+.controlsSection .panel .head{
+  position:relative!important; top:auto!important; inset:auto!important;
+  flex:0 0 auto!important; min-height:42px!important;
+  padding:0 0 10px!important; margin:0!important;
+  border-bottom:1px solid rgba(206,170,255,.10)!important;
+  background:linear-gradient(180deg,rgba(11,7,24,.99),rgba(11,7,24,.92))!important;
+  z-index:30!important;
+}
+.controlsSection .panel .head b{
+  white-space:nowrap!important; overflow:hidden!important; text-overflow:ellipsis!important;
+  font-size:clamp(11px,1.15cqw,14px)!important;
+}
+.controlsSection .panel .tag{
+  white-space:nowrap!important; overflow:hidden!important; text-overflow:ellipsis!important;
+  font-size:clamp(7px,.72cqw,8px)!important;
+}
+.controlsSection .panel .body{
+  flex:1 1 auto!important; min-height:0!important;
+  overflow:auto!important; overscroll-behavior:contain!important;
+  scrollbar-width:thin!important;
+  scrollbar-color:rgba(185,132,255,.55) rgba(255,255,255,.04)!important;
+  padding:10px 2px 18px 0!important;
+  display:grid!important; gap:10px!important;
+}
+.controlsSection .panel .body::-webkit-scrollbar{width:8px}
+.controlsSection .panel .body::-webkit-scrollbar-track{background:rgba(255,255,255,.03);border-radius:10px}
+.controlsSection .panel .body::-webkit-scrollbar-thumb{background:rgba(185,132,255,.42);border-radius:10px;border:2px solid transparent;background-clip:padding-box}
+
+/* ---------- Fixed, aligned grid cards ---------- */
+.controlsSection .controlGrid,
+.controlsSection .visibilitySec .controlGrid{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  align-items:stretch!important;
+  gap:8px!important;
+}
+.controlsSection .controlGrid .row{
+  min-width:0!important;
+  min-height:76px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:space-between!important;
+}
+.controlsSection .controlGrid .row label{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) max-content!important;
+  align-items:start!important;
+  gap:6px!important;
+  min-width:0!important;
+  white-space:normal!important;
+  overflow-wrap:normal!important;
+  word-break:normal!important;
+  font-size:clamp(8px,1.75cqw,10.5px)!important;
+  line-height:1.22!important;
+}
+.controlsSection .controlGrid .row label:first-child{min-width:0!important}
+.controlsSection .controlGrid .row label span{white-space:nowrap!important;}
+.controlsSection .row label,
+.controlsSection .chk,
+.controlsSection .controlTitle{
+  overflow-wrap:normal!important;
+  word-break:normal!important;
+}
+.controlsSection .chk{
+  min-width:0!important;
+  font-size:clamp(8px,1.65cqw,10px)!important;
+  line-height:1.25!important;
+}
+.controlsSection button{
+  min-width:0!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  font-size:clamp(8px,1.6cqw,10px)!important;
+}
+.controlsSection select{min-width:0!important; width:100%!important;}
+
+.controlsSection .viewsSec .grid3{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:7px!important;
+}
+.controlsSection .viewsSec button{min-height:42px!important;}
+.controlsSection .actionbar{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:7px!important;
+}
+.controlsSection .actionbar button{min-height:38px!important;}
+
+/* ---------- Minimize: remains right, only the tab shrinks; text is intentionally replaced by icon. ---------- */
+#app.railCollapsed .pageMain{width:calc(100% - var(--rail-collapsed) - var(--rail-gap))!important;}
+#app.railCollapsed .controlsSection,
+.controlsSection.collapsedRail{
+  left:auto!important; right:var(--rail-gap)!important; width:var(--rail-collapsed)!important;
+}
+#app.railCollapsed .controlsSection .panel,
+.controlsSection .panel.collapsed{
+  width:var(--rail-collapsed)!important; height:var(--rail-collapsed)!important;
+  min-width:var(--rail-collapsed)!important; min-height:var(--rail-collapsed)!important;
+  max-width:var(--rail-collapsed)!important; max-height:var(--rail-collapsed)!important;
+  inset:0 0 auto auto!important; overflow:hidden!important; padding:7px!important;
+}
+#app.railCollapsed .controlsSection .panel .head,
+.controlsSection .panel.collapsed .head{
+  flex:0 0 auto!important; height:44px!important; min-height:44px!important;
+  padding:0!important; margin:0!important; border:0!important;
+  display:flex!important; justify-content:center!important; align-items:center!important;
+  background:transparent!important;
+}
+#app.railCollapsed .controlsSection .panel .head b,
+#app.railCollapsed .controlsSection .panel .tag,
+#app.railCollapsed .controlsSection .panel .body,
+.controlsSection .panel.collapsed .head b,
+.controlsSection .panel.collapsed .tag,
+.controlsSection .panel.collapsed .body{display:none!important}
+#app.railCollapsed .controlsSection #collapse,
+.controlsSection .panel.collapsed #collapse{
+  width:44px!important; height:44px!important; min-width:44px!important; min-height:44px!important;
+  padding:0!important; margin:0!important; font-size:0!important;
+  display:flex!important; align-items:center!important; justify-content:center!important;
+  border-radius:12px!important;
+}
+#app.railCollapsed .controlsSection #collapse::before,
+.controlsSection .panel.collapsed #collapse::before{
+  content:'☰'; font-size:18px; line-height:1; color:#f4eaff;
+}
+
+/* ---------- Responsive: the rail stays RIGHT; only its internal density changes. ---------- */
+@media (min-width:1600px){
+  :root{--rail-w:470px;--rail-gap:16px;--edge-gap:14px;--rail-pad:12px}
+}
+@media (max-width:1199px) and (min-width:901px){
+  :root{--rail-w:360px;--rail-gap:10px;--edge-gap:9px;--rail-pad:8px}
+  .controlsSection .controlGrid,.controlsSection .visibilitySec .controlGrid{grid-template-columns:1fr!important}
+}
+@media (max-width:900px){
+  :root{--rail-w:320px;--rail-gap:8px;--edge-gap:7px;--rail-pad:7px;--header-h:82px}
+  .visualSection{height:clamp(420px,58vh,650px)!important;min-height:410px!important}
+  .magnifiedSection .tabs{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .magnifiedSection .sectionHeading{display:block!important}
+  .magnifiedSection .sectionHeading>div{display:block!important;}
+  .magnifiedSection .sectionHeading>span{display:block!important;max-width:100%!important;margin-top:3px!important;text-align:left!important}
+  .visualInfoRowTop{grid-template-columns:1fr!important}
+  .visualInfoHint{display:none!important}
+}
+@media (max-width:700px){
+  :root{--rail-w:42vw;--rail-gap:7px;--edge-gap:6px;--rail-pad:6px;--header-h:78px}
+  .brandBlock h1{font-size:clamp(16px,4.1vw,21px)!important}
+  .headerSub{font-size:8px!important}
+  .visualSection{height:clamp(400px,56vh,590px)!important;min-height:390px!important}
+  .controlsSection .viewsSec .grid3{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .controlsSection .controlGrid,.controlsSection .visibilitySec .controlGrid{grid-template-columns:1fr!important}
+  .controlsSection .actionbar{grid-template-columns:1fr 1fr!important}
+}
+@media (max-width:520px){
+  :root{--rail-w:44vw;--rail-gap:5px;--edge-gap:5px;--rail-pad:5px;--header-h:74px}
+  .visualSection{height:410px!important;min-height:390px!important}
+  .controlsSection .panel{padding:9px!important}
+  .controlsSection .viewsSec .grid3{grid-template-columns:1fr 1fr!important}
+  .controlsSection .actionbar{grid-template-columns:1fr!important}
+  .controlsSection .controlGrid .row label{font-size:8px!important}
+  .controlsSection .chk{font-size:8px!important}
+  .sectionHeading>div{font-size:10px!important}
+}
+
+/* Never let any responsive child alter the two-column page geometry. */
+.pageMain,.visualSection,.magnifiedSection,.controlsSection,.controlsSection .panel,.controlsSection .body{min-width:0!important;max-width:100%!important;}
+</style>
+
 </head>
 <body>
 <div id="app">
@@ -138,7 +1225,7 @@ body{margin:0}
       <div class="brandBlock">
         <div class="eyebrow">MILKY WAY • UNIFIED FACTUAL 3D DYNAMICS</div>
         <h1>Absolute Solar-System Corkscrew Motion</h1>
-        <div class="headerSub">Galactic orbit + vertical oscillation • moving Sun • 8 planets carried with the Sun • separate purple solar axial spin • fixed side control rail</div>
+        <div class="headerSub">Galactic orbit + vertical oscillation • moving Sun • 8 planets carried with the Sun • separate purple solar axial spin • fixed responsive side control rail • v24</div>
       </div>
       <div id="modeStrip" aria-live="polite">
         <span id="modeStripView">ABSOLUTE CORKSCREW</span><span class="modeDot">•</span>
@@ -154,9 +1241,66 @@ body{margin:0}
       <div id="loading">INITIALIZING OFFLINE WEBGL • 25,000 NODES</div>
       <canvas id="gl"></canvas>
       <div id="vignette"></div>
+      <svg id="fixedGalaxyLabels" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <text id="galaxy-title" class="labelTitle" x="600" y="42" text-anchor="middle">The Milky Way Galaxy</text>
+
+        <line id="lead-gc" class="leader"/><circle id="dot-gc" class="dot" r="4"/>
+        <text id="txt-gc" class="label" text-anchor="middle">Galactic Center</text>
+        <text id="sub-gc" class="sub" text-anchor="middle">Supermassive Black Hole • Sagittarius A*</text>
+
+        <line id="lead-bulge" class="leader"/><circle id="dot-bulge" class="dot" r="3.5"/>
+        <text id="txt-bulge" class="label">Nuclear Bulge</text>
+
+        <line id="lead-bar" class="leader"/><circle id="dot-bar" class="dot" r="3.5"/>
+        <text id="txt-bar" class="label">Bar</text>
+
+        <line id="lead-perseus" class="leader"/><circle id="dot-perseus" class="dot" r="3.5"/>
+        <text id="txt-perseus" class="label">Spiral Arm</text>
+        <text id="sub-perseus" class="sub">Perseus Arm</text>
+
+        <line id="lead-sagittarius" class="leader"/><circle id="dot-sagittarius" class="dot" r="3.5"/>
+        <text id="txt-sagittarius" class="label">Spiral Arm</text>
+        <text id="sub-sagittarius" class="sub">Sagittarius Arm</text>
+
+        <line id="lead-scutum" class="leader"/><circle id="dot-scutum" class="dot" r="3.5"/>
+        <text id="txt-scutum" class="label">Spiral Arm</text>
+        <text id="sub-scutum" class="sub">Scutum–Centaurus Arm</text>
+
+        <line id="lead-local" class="leader"/><circle id="dot-local" class="dot" r="3.5"/>
+        <text id="txt-local" class="label">Spiral Arm</text>
+        <text id="sub-local" class="sub">Local Arm • Orion Spur</text>
+
+        <line id="lead-dust" class="leader"/><circle id="dot-dust" class="dot" r="3.5"/>
+        <text id="txt-dust" class="label">Dust Lanes</text>
+        <text id="sub-dust" class="sub">Interstellar Dust</text>
+
+        <line id="lead-norma" class="leader"/><circle id="dot-norma" class="dot" r="3.5"/>
+        <text id="txt-norma" class="label" text-anchor="middle">Spiral Arm</text>
+        <text id="sub-norma" class="sub" text-anchor="middle">Norma Arm</text>
+
+        <line id="lead-halo" class="leader"/><circle id="dot-halo" class="dot" r="3.5"/>
+        <text id="txt-halo" class="label">Stellar Halo</text>
+        <text id="sub-halo" class="sub">Old Stars • Globular Clusters</text>
+
+        <line id="lead-solar" class="leader"/><circle id="dot-solar" class="solarDot" r="5"/>
+        <text id="txt-solar" class="label">Our Solar System</text>
+        <text id="sub-solar" class="sub">in the Local Arm (Orion Spur)</text>
+
+        <g class="key" transform="translate(26,24)">
+          <rect class="labelBox" x="0" y="0" width="150" height="21"/>
+          <text x="10" y="14">DYNAMIC VISUAL LABELS</text>
+        </g>
+      </svg>
       <div id="stats"></div>
-      <div id="help">Drag = 3D rotate • Shift-drag / right-drag = pan • Wheel = zoom<br>Use ABSOLUTE CORKSCREW for combined Sun + planet paths • PURPLE = Sun axial spin</div>
-      <div id="caption">25,000-node WebGL • absolute planetary corkscrew • purple Sun axial spin • velocity diagnostics</div>
+      <div class="visualInfoBar" aria-label="3D visual instructions and description">
+        <div class="visualInfoRow visualInfoRowTop">
+          <div id="help"><b>3D navigation</b> • Drag = rotate • Shift-drag / right-drag = pan • Mouse wheel = zoom</div>
+          <div class="visualInfoHint"><b>Live frame</b> • Galactic reference • Sun + planets carried together • labels follow 3D features</div>
+        </div>
+        <div class="visualInfoRow visualInfoRowBottom">
+          <div id="caption">25,000-node WebGL • absolute Solar-System corkscrew • purple Sun axial spin • velocity diagnostics • responsive fixed-label visualisation</div>
+        </div>
+      </div>
     </section>
 
     <section class="magnifiedSection" id="magnifiedSection" aria-label="Unified local dynamics magnified area">
@@ -165,7 +1309,7 @@ body{margin:0}
         <span>Absolute transport + planetary orbits + solar axial spin + velocity diagnostics</span>
       </div>
       <div id="inset">
-        <div class="ititle">UNIFIED LOCAL DYNAMICS • MAGNIFIED</div>
+        <div class="ititle" aria-hidden="true">LOCAL VIEW</div>
         <div class="isub">Absolute transport + planetary orbits + solar axial spin</div>
         <div class="tabs" aria-label="Unified analysis views"><button data-tab="planets" class="active">PLANETS</button><button data-tab="absolute">ABSOLUTE 3D</button><button data-tab="corkscrew">CORKSCREW</button><button data-tab="spin">SUN SPIN</button><button data-tab="velocity">VELOCITY S</button></div>
         <canvas id="insetCanvas"></canvas>
@@ -174,7 +1318,7 @@ body{margin:0}
 
     <section class="controlsSection" id="controlsSection" aria-label="Fixed dynamic control grid">
       <div class="panel" id="panel">
-        <div class="head"><b>Control Center • Fixed Side Grid</b><span class="tag">25K • OFFLINE WEBGL</span><button id="collapse" aria-label="Minimize control panel" title="Minimize control panel">−</button></div>
+        <div class="head"><b>Control Center • Fixed Side Grid</b><span class="tag">25K • OFFLINE WEBGL • RESP.</span><button id="collapse" aria-label="Minimize control panel" title="Minimize control panel">−</button></div>
         <div class="body">
     <div class="sec viewsSec" style="margin-top:0">
       <div class="controlTitle">Views • fixed aligned matrix</div>
@@ -242,6 +1386,7 @@ body{margin:0}
       <label class="chk"><input id="spinOn" type="checkbox" checked> Show Sun axial spin • PURPLE</label>
       <label class="chk"><input id="frameOn" type="checkbox" checked> Show heliocentric local frame</label>
       <label class="chk"><input id="planetOn" type="checkbox" checked> Show eight planets</label>
+      <label class="chk"><input id="labelsOn" type="checkbox" checked> Show dynamic visual labels</label>
       <div class="row"><label>Node size <span class="val" id="nodeSizeV">1.80×</span></label><input id="nodeSize" type="range" min=".5" max="4" step=".05" value="1.8"></div>
       <div class="row"><label>Node brightness <span class="val" id="nodeAlphaV">1.00×</span></label><input id="nodeAlpha" type="range" min=".05" max="2" step=".05" value="1"></div>
       </div>
@@ -317,7 +1462,7 @@ body{margin:0}
     vm:'research', motion:'physical', zScale:7, fourAmp:1,
     warpOn:true, sunTrail:true, planeOn:true, barOn:true, solarVector:true,
     nodesOn:true, haloOn:true, planetOrbitOn:true, planetTrailOn:true, absoluteOn:true,
-    spinOn:true, frameOn:true, planetOn:true,
+    spinOn:true, frameOn:true, planetOn:true, labelsOn:true,
     nodeSize:1.8, nodeAlpha:1, autoCamera:false, camSpeed:1, barSpeed:1, swarmSpeed:1,
     view:'full', tab:'corkscrew', planetScale:1.35, planetSize:2.5, sunSize:2.5, teachYearsPerMyr:5, corkscrewTrailMyr:230
   };
@@ -827,7 +1972,7 @@ body{margin:0}
   document.getElementById('corkSpan').oninput=e=>{state.corkscrewTrailMyr=+e.target.value;document.getElementById('corkSpanV').textContent=state.corkscrewTrailMyr.toFixed(0)+' Myr'};
   document.getElementById('verticalModel').onchange=e=>{state.vm=e.target.value;document.getElementById('vmV').textContent=state.vm==='research'?'87.8 Myr':state.vm==='fourwave'?'57.5 Myr':'60 Myr';updateModeStrip()};
   document.getElementById('motionMode').onchange=e=>{state.motion=e.target.value;document.getElementById('coupleV').textContent=state.motion==='physical'?'PHYSICAL':'TEACHING';updateModeStrip()};
-  [['warpOn','warpOn'],['sunTrail','sunTrail'],['planeOn','planeOn'],['barOn','barOn'],['solarVector','solarVector'],['nodesOn','nodesOn'],['haloOn','haloOn'],['planetOrbitOn','planetOrbitOn'],['planetTrailOn','planetTrailOn'],['absoluteOn','absoluteOn'],['spinOn','spinOn'],['frameOn','frameOn'],['planetOn','planetOn'],['autoCamera','autoCamera']].forEach(([id,key])=>document.getElementById(id).onchange=e=>{state[key]=e.target.checked;updateModeStrip()});
+  [['warpOn','warpOn'],['sunTrail','sunTrail'],['planeOn','planeOn'],['barOn','barOn'],['solarVector','solarVector'],['nodesOn','nodesOn'],['haloOn','haloOn'],['planetOrbitOn','planetOrbitOn'],['planetTrailOn','planetTrailOn'],['absoluteOn','absoluteOn'],['spinOn','spinOn'],['frameOn','frameOn'],['planetOn','planetOn'],['labelsOn','labelsOn'],['autoCamera','autoCamera']].forEach(([id,key])=>document.getElementById(id).onchange=e=>{state[key]=e.target.checked;updateModeStrip()});
   document.getElementById('nodeSize').oninput=e=>{state.nodeSize=+e.target.value;document.getElementById('nodeSizeV').textContent=state.nodeSize.toFixed(2)+'×'};
   document.getElementById('nodeAlpha').oninput=e=>{state.nodeAlpha=+e.target.value;document.getElementById('nodeAlphaV').textContent=state.nodeAlpha.toFixed(2)+'×'};
   document.getElementById('camSpeed').oninput=e=>{state.camSpeed=+e.target.value;document.getElementById('camSpeedV').textContent=state.camSpeed.toFixed(2)+'×'};
@@ -838,6 +1983,7 @@ body{margin:0}
     const rail=document.getElementById('controlsSection');
     const collapsed=panel.classList.toggle('collapsed');
     rail.classList.toggle('collapsedRail',collapsed);
+    document.getElementById('app').classList.toggle('railCollapsed',collapsed);
     const btn=document.getElementById('collapse');
     btn.textContent=collapsed?'＋':'−';
     btn.setAttribute('aria-label',collapsed?'Open control panel':'Minimize control panel');
@@ -848,13 +1994,13 @@ body{margin:0}
       const panel=document.getElementById('panel');
       const btn=document.getElementById('collapse');
       if(panel.classList.contains('collapsed')){
-        panel.classList.remove('collapsed'); document.getElementById('controlsSection').classList.remove('collapsedRail'); btn.textContent='−';
+        panel.classList.remove('collapsed'); document.getElementById('controlsSection').classList.remove('collapsedRail'); document.getElementById('app').classList.remove('railCollapsed'); btn.textContent='−';
         btn.setAttribute('aria-label','Minimize control grid'); btn.title='Minimize control grid';
       }
     }
   });
   document.getElementById('play').onclick=()=>{state.run=!state.run;const b=document.getElementById('play');b.textContent=state.run?'Pause':'Play';b.classList.toggle('active',state.run)};
-  document.getElementById('reset').onclick=()=>{T=0;planetClockYears=0;sunSpinDays=0;state.vm='research';state.motion='physical';state.fourAmp=1;state.teachYearsPerMyr=5;state.corkscrewTrailMyr=230;state.planetScale=1.35;state.planetSize=2.5;state.sunSize=2.5;viewPreset('full');distance=44;target=[0,0,0];yaw=28*DEG;pitch=24*DEG;state.run=true;state.autoCamera=false;document.getElementById('play').textContent='Pause';document.getElementById('autoCamera').checked=false;document.getElementById('verticalModel').value='research';document.getElementById('motionMode').value='physical';document.getElementById('vmV').textContent='87.8 Myr';document.getElementById('coupleV').textContent='PHYSICAL';document.getElementById('planetScale').value=1.35;document.getElementById('planetSize').value=2.5;document.getElementById('sunSize').value=2.5;document.getElementById('psV').textContent='1.35×';document.getElementById('planetSizeV').textContent='2.5×';document.getElementById('sunSizeV').textContent='2.5×';showToast('Full physical reset');updateModeStrip()};
+  document.getElementById('reset').onclick=()=>{T=0;planetClockYears=0;sunSpinDays=0;state.vm='research';state.motion='physical';state.fourAmp=1;state.teachYearsPerMyr=5;state.corkscrewTrailMyr=230;state.planetScale=1.35;state.planetSize=2.5;state.sunSize=2.5;viewPreset('full');distance=44;target=[0,0,0];yaw=28*DEG;pitch=24*DEG;state.run=true;state.autoCamera=false;document.getElementById('play').textContent='Pause';document.getElementById('autoCamera').checked=false;document.getElementById('labelsOn').checked=true;state.labelsOn=true;document.getElementById('verticalModel').value='research';document.getElementById('motionMode').value='physical';document.getElementById('vmV').textContent='87.8 Myr';document.getElementById('coupleV').textContent='PHYSICAL';document.getElementById('planetScale').value=1.35;document.getElementById('planetSize').value=2.5;document.getElementById('sunSize').value=2.5;document.getElementById('psV').textContent='1.35×';document.getElementById('planetSizeV').textContent='2.5×';document.getElementById('sunSizeV').textContent='2.5×';showToast('Full physical reset');updateModeStrip(); document.getElementById('app').classList.remove('railCollapsed'); document.getElementById('controlsSection').classList.remove('collapsedRail'); document.getElementById('panel').classList.remove('collapsed'); document.getElementById('collapse').textContent='−'};
   document.getElementById('fit').onclick=()=>{viewPreset('full');distance=44;target=[0,0,0]};
   document.getElementById('center').onclick=()=>viewPreset('solar');
   document.getElementById('focusCore').onclick=()=>{yaw=28*DEG;pitch=30*DEG;distance=12;target=[0,0,0];showToast('Galactic core focus')};
@@ -877,6 +2023,78 @@ body{margin:0}
   });
   glCanvas.addEventListener('pointerup',()=>dragging=false);
   glCanvas.addEventListener('wheel',e=>{e.preventDefault();distance*=Math.exp(e.deltaY*.00125);distance=Math.max(5.5,Math.min(80,distance))},{passive:false});
+
+
+  // ---------- dynamic visual labels ----------
+  // Labels are part of the visual layer. Their text and leader lines move with
+  // the projected 3D feature, while a small offset keeps each callout legible.
+  const labelAnchors = [
+    {name:'gc',line:'lead-gc',dot:'dot-gc',text:'txt-gc',sub:'sub-gc',offset:[0,-92],world:()=>[0,0,0],anchor:'middle'},
+    {name:'bulge',line:'lead-bulge',dot:'dot-bulge',text:'txt-bulge',offset:[-120,-62],world:()=>[1.15,0,0.35],anchor:'middle'},
+    {name:'bar',line:'lead-bar',dot:'dot-bar',text:'txt-bar',offset:[95,-64],world:()=>{const a=T*state.gal*0.44*state.barSpeed; return [2.2*Math.cos(a),0,2.2*Math.sin(a)]},anchor:'middle'},
+    {name:'perseus',line:'lead-perseus',dot:'dot-perseus',text:'txt-perseus',sub:'sub-perseus',offset:[120,-70],world:()=>galaxyLabelPoint(12.8,0.55,0.03),anchor:'middle'},
+    {name:'sagittarius',line:'lead-sagittarius',dot:'dot-sagittarius',text:'txt-sagittarius',sub:'sub-sagittarius',offset:[-125,-18],world:()=>galaxyLabelPoint(9.8,2.25,-0.02),anchor:'start'},
+    {name:'scutum',line:'lead-scutum',dot:'dot-scutum',text:'txt-scutum',sub:'sub-scutum',offset:[-130,60],world:()=>galaxyLabelPoint(14.4,4.25,0.02),anchor:'start'},
+    {name:'local',line:'lead-local',dot:'dot-local',text:'txt-local',sub:'sub-local',offset:[120,-8],world:()=>galaxyLabelPoint(8.9,5.55,0.01),anchor:'start'},
+    {name:'dust',line:'lead-dust',dot:'dot-dust',text:'txt-dust',sub:'sub-dust',offset:[-145,72],world:()=>galaxyLabelPoint(13.1,3.45,0.00),anchor:'start'},
+    {name:'norma',line:'lead-norma',dot:'dot-norma',text:'txt-norma',sub:'sub-norma',offset:[0,92],world:()=>galaxyLabelPoint(15.5,5.35,0.02),anchor:'middle'},
+    {name:'halo',line:'lead-halo',dot:'dot-halo',text:'txt-halo',sub:'sub-halo',offset:[125,70],world:()=>[13.8,4.6,-3.8],anchor:'start'},
+    {name:'solar',line:'lead-solar',dot:'dot-solar',text:'txt-solar',sub:'sub-solar',offset:[120,18],world:()=>solarPos(T),anchor:'start'}
+  ];
+  const visualLabelRefs={};
+  labelAnchors.forEach(a=>{
+    visualLabelRefs[a.name]={
+      line:document.getElementById(a.line),dot:document.getElementById(a.dot),
+      text:document.getElementById(a.text),sub:a.sub?document.getElementById(a.sub):null
+    };
+  });
+  function galaxyLabelPoint(r,baseAngle,vertical=0){
+    const theta=baseAngle+T*state.gal*state.swarmSpeed*(1.1/(0.72+r));
+    return [r*Math.cos(theta),vertical+warpY(r,theta,T),r*Math.sin(theta)];
+  }
+  function projectWorldToVisual(world){
+    const m=modelViewProjection();
+    const x=world[0],y=world[1],z=world[2];
+    const cx=m[0]*x+m[4]*y+m[8]*z+m[12];
+    const cy=m[1]*x+m[5]*y+m[9]*z+m[13];
+    const cw=m[3]*x+m[7]*y+m[11]*z+m[15];
+    if(!Number.isFinite(cw)||cw<=0.0001)return null;
+    const nx=cx/cw,ny=cy/cw;
+    if(!Number.isFinite(nx)||!Number.isFinite(ny))return null;
+    const sx=(nx+1)*600;
+    const sy=(1-ny)*350;
+    return {x:sx,y:sy,visible:nx>-1.15&&nx<1.15&&ny>-1.15&&ny<1.15};
+  }
+  function placeVisualLabel(a,p){
+    const ref=visualLabelRefs[a.name]; if(!ref)return;
+    // Keep the label and its anchor inside the actual visual SVG frame.
+    const ax=Math.max(38,Math.min(1162,p.x));
+    const ay=Math.max(54,Math.min(646,p.y));
+    let lx=ax+a.offset[0],ly=ay+a.offset[1];
+    lx=Math.max(52,Math.min(1148,lx));
+    ly=Math.max(32,Math.min(630,ly));
+    const leaderX=lx,leaderY=ly+(a.sub?8:3);
+    ref.line.setAttribute('x1',leaderX.toFixed(1));ref.line.setAttribute('y1',leaderY.toFixed(1));
+    ref.line.setAttribute('x2',ax.toFixed(1));ref.line.setAttribute('y2',ay.toFixed(1));
+    ref.dot.setAttribute('cx',ax.toFixed(1));ref.dot.setAttribute('cy',ay.toFixed(1));
+    ref.text.setAttribute('x',lx.toFixed(1));ref.text.setAttribute('y',ly.toFixed(1));ref.text.setAttribute('text-anchor',a.anchor||'start');
+    if(ref.sub){ref.sub.setAttribute('x',lx.toFixed(1));ref.sub.setAttribute('y',(ly+18).toFixed(1));ref.sub.setAttribute('text-anchor',a.anchor||'start');}
+    ref.line.style.opacity='1';ref.dot.style.opacity='1';ref.text.style.opacity='1';if(ref.sub)ref.sub.style.opacity='1';
+  }
+  function hideVisualLabel(a){
+    const ref=visualLabelRefs[a.name];if(!ref)return;
+    ref.line.style.opacity='0';ref.dot.style.opacity='0';ref.text.style.opacity='0';if(ref.sub)ref.sub.style.opacity='0';
+  }
+  function updateDynamicGalaxyLabels(){
+    const svg=document.getElementById('fixedGalaxyLabels');
+    if(!state.labelsOn){svg.classList.add('hidden');return;}
+    svg.classList.remove('hidden');
+    for(const a of labelAnchors){
+      const p=projectWorldToVisual(a.world());
+      if(!p||!p.visible){hideVisualLabel(a);continue;}
+      placeVisualLabel(a,p);
+    }
+  }
 
   // ---------- HUD ----------
   let T=0,planetClockYears=0,sunSpinDays=0,last=performance.now();
@@ -909,7 +2127,9 @@ body{margin:0}
     if(state.autoCamera) yaw += dt*0.12*state.camSpeed;
     updateGalaxyPositions(T);
     drawGalaxy(T);
+    updateDynamicGalaxyLabels();
     drawInset(T);
+    document.getElementById('fixedGalaxyLabels').classList.toggle('hidden', !state.labelsOn);
     updateModeStrip();
     updateStats();
     document.getElementById('loading').style.display='none';
@@ -929,5 +2149,40 @@ body{margin:0}
   }
 })();
 </script>
+
+<script id="final-v24-layout-hardening">
+(() => {
+  const app=document.getElementById('app');
+  const rail=document.getElementById('controlsSection');
+  const panel=document.getElementById('panel');
+  const body=panel?.querySelector('.body');
+  const head=panel?.querySelector('.head');
+  const btn=document.getElementById('collapse');
+  if(!app||!rail||!panel||!body||!head||!btn) return;
+
+  // The rail is fixed, while only its body scrolls. The heading never scrolls/collapses.
+  panel.style.display='flex';
+  panel.style.flexDirection='column';
+  panel.style.overflow='hidden';
+  head.style.flex='0 0 auto';
+  head.style.position='relative';
+  head.style.top='auto';
+  body.style.flex='1 1 auto';
+  body.style.minHeight='0';
+  body.style.overflow='auto';
+  body.style.overscrollBehavior='contain';
+
+  const sync = () => {
+    const r=rail.getBoundingClientRect();
+    if(r.width > 0) document.documentElement.style.setProperty('--actual-rail-w', `${Math.round(r.width)}px`);
+  };
+  window.addEventListener('resize',sync,{passive:true});
+  sync();
+
+  // Prevent repeated nested heading text in the local-dynamics card.
+  document.querySelectorAll('.magnifiedSection .ititle,.magnifiedSection .isub').forEach(el=>el.setAttribute('aria-hidden','true'));
+})();
+</script>
+
 </body>
 </html>
